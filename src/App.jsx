@@ -4,6 +4,8 @@ import Layout from "./components/layout/layout";
 import "./App.scss";
 import Login from "./pages/login";
 function App() {
+  const [count, setCount] = useState(0)
+
   return (
     <Router>
       <Routes>
