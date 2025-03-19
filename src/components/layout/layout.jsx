@@ -5,6 +5,7 @@ const Layout = () => {
     return (
         <div className="container mx-auto">
             <Outlet />
+            <h1>Layout</h1>
         </div>
     );
 }
