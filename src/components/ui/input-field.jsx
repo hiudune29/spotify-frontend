@@ -1,0 +1,31 @@
+const InputField = ({
+  type = "text",
+  id,
+  name,
+  value,
+  onChange,
+  error,
+  placeholder,
+}) => {
+  return (
+    <div className="w-full">
+      <input
+        type={type}
+        id={id}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className={`w-full px-4 py-3 rounded-md bg-[#121212] text-white border 
+          ${
+            error
+              ? "border-red-500 focus:ring-2 focus:ring-red-500"
+              : "border-gray-600 focus:ring-2 focus:ring-green-500"
+          } focus:outline-none`}
+        placeholder={placeholder}
+      />
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+    </div>
+  );
+};
+
+export default InputField;
