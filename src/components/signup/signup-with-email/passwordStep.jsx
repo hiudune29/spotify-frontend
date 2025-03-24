@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
+import InputField from "../../ui/field-input";
+import ErrorMessage from "../../ui/error-message";
+import PasswordToggleButton from "../../ui/password-toggle-button";
 
-const PasswordStep = ({ nextStep, prevStep, userData, updateUserData }) => {
+const PasswordStep = ({ nextStep, userData, updateUserData }) => {
   const [password, setPassword] = useState(userData.password || "");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -48,44 +51,29 @@ const PasswordStep = ({ nextStep, prevStep, userData, updateUserData }) => {
             Mật khẩu
           </label>
           <div className="relative">
-            <input
+            <InputField
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               value={password}
+              error={error}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full px-4 py-3 rounded-md bg-[#121212] text-white border ${
-                error ? "border-red-500" : "border-gray-600"
-              } focus:outline-none focus:ring-2 focus:ring-green-500`}
               placeholder="Tạo mật khẩu"
               autoComplete="new-password"
             />
-            <button
-              type="button"
-              className="absolute inset-y-0 right-0 px-3 flex items-center text-sm text-gray-400"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "Ẩn" : "Hiện"}
-            </button>
+            <PasswordToggleButton
+              showPassword={showPassword}
+              togglePassword={() => setShowPassword(!showPassword)}
+            />
           </div>
-          {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
-          <p className="mt-2 text-xs text-gray-400">
-            Mật khẩu phải có ít nhất 8 ký tự
-          </p>
+          {error && <ErrorMessage message={error} />}
         </div>
 
         <div className="flex space-x-4 pt-2">
           <button
-            type="button"
-            onClick={prevStep}
-            className="w-1/2 py-3 rounded-full font-semibold bg-transparent border border-gray-500 text-white hover:border-white"
-          >
-            Quay lại
-          </button>
-          <button
             type="submit"
             disabled={!isValid}
-            className={`w-1/2 py-3 rounded-full font-semibold 
+            className={`w-1/2 py-3 rounded-full font-semibold mx-auto
               ${
                 isValid
                   ? "bg-green-500 hover:bg-green-400 text-black"

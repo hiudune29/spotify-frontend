@@ -6,6 +6,8 @@ import PasswordStep from "../../components/signup/signup-with-email/passwordStep
 import InformationStep from "../../components/signup/signup-with-email/informationStep";
 import OTPStep from "../../components/signup/signup-with-email/otpStep";
 import SocialLoginButtons from "../../components/ui/social-button";
+import DividerWithText from "../../components/ui/divider-with-text";
+import SignupProgress from "../../components/signup/process-signup";
 
 const SignUpPage = () => {
   const [startedSignup, setStartedSignup] = useState(false);
@@ -131,18 +133,6 @@ const SignUpPage = () => {
             Đăng ký để bắt đầu nghe nhạc
           </h1>
 
-          {/* Các nút đăng nhập bằng mạng xã hội */}
-          <SocialLoginButtons signUp={true} />
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-black px-4 text-sm text-gray-400">hoặc</span>
-            </div>
-          </div>
-
           {/* Biểu mẫu nhập email */}
           <EmailStep
             nextStep={startSignupProcess}
@@ -150,12 +140,17 @@ const SignUpPage = () => {
             updateUserData={updateUserData}
           />
 
+          <DividerWithText text="hoặc" />
+          {/* Các nút đăng nhập bằng mạng xã hội */}
+          <SocialLoginButtons signUp={true} />
+
+          <DividerWithText />
           {/* Liên kết đăng nhập */}
           <div className="text-center mt-6">
             <p className="text-sm text-gray-400">
               Đã có tài khoản?{" "}
               <a href="/login" className="text-white hover:underline">
-                Đăng nhập
+                Đăng nhập tại đây
               </a>
             </p>
           </div>
@@ -194,13 +189,29 @@ const SignUpPage = () => {
             </div>
           ))}
         </div>
+        {/* <SignupProgress step={step} /> */}
 
+        <div className="bg-[#121212] p-3 rounded-md border border-gray-700 mb-4">
+          <div className="flex justify-between items-center">
+            <div className="text-gray-400 text-sm">
+              <span>Email:</span>
+              <span className="ml-2 text-white font-medium">
+                {userData.email}
+              </span>
+            </div>
+            <button
+              onClick={cancelSignup}
+              className="text-xs text-green-500 hover:text-green-400 hover:underline"
+            >
+              Thay đổi
+            </button>
+          </div>
+        </div>
         {/* Nội dung các bước */}
         <div className="mt-4">
           {step === 1 && (
             <PasswordStep
               nextStep={nextStep}
-              prevStep={cancelSignup}
               userData={userData}
               updateUserData={updateUserData}
             />

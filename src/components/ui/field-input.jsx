@@ -1,4 +1,5 @@
 const InputField = ({
+  label,
   type = "text",
   id,
   name,
@@ -6,9 +7,13 @@ const InputField = ({
   onChange,
   error,
   placeholder,
+  autoComplete,
 }) => {
   return (
-    <div className="w-full">
+    <div className="space-y-2">
+      <label htmlFor={name} className="block text-sm font-medium text-white">
+        {label}
+      </label>
       <input
         type={type}
         id={id}
@@ -22,8 +27,8 @@ const InputField = ({
               : "border-gray-600 focus:ring-2 focus:ring-green-500"
           } focus:outline-none`}
         placeholder={placeholder}
+        autoComplete={autoComplete}
       />
-      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
     </div>
   );
 };

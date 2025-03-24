@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import InputField from "../../ui/field-input";
+import ErrorMessage from "../../ui/error-message";
 
 const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
   const [formData, setFormData] = useState({
@@ -117,27 +119,16 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Họ tên */}
-        <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-white mb-2"
-          >
-            Họ tên
-          </label>
-          <input
-            type="text"
-            id="name"
+        <div className="space-y-1">
+          <InputField
+            label="Họ tên"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className={`w-full px-4 py-3 rounded-md bg-[#121212] text-white border ${
-              errors.name ? "border-red-500" : "border-gray-600"
-            } focus:outline-none focus:ring-2 focus:ring-green-500`}
+            error={errors.name}
             placeholder="Nhập họ tên của bạn"
           />
-          {errors.name && (
-            <p className="mt-2 text-sm text-red-500">{errors.name}</p>
-          )}
+          {errors.name && <ErrorMessage message={errors.name} />}
         </div>
 
         {/* Ngày sinh */}

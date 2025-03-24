@@ -41,7 +41,10 @@ const LoginPage = () => {
         <div className="text-center">
           <p className="text-sm text-gray-400">
             Bạn chưa có tài khoản?{" "}
-            <a href="#" className="text-white underline hover:text-[#1DB954]">
+            <a
+              href="/signup"
+              className="text-white underline hover:text-[#1DB954]"
+            >
               Đăng ký Spotify
             </a>
           </p>
