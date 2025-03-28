@@ -1,16 +1,41 @@
 // playlistheader.jsx
-import React from "react";
+import { React, useState } from "react";
 import avatar from "../../assets/avatar.png";
+import { ImagePlus } from "lucide-react";
+import EditPlaylistModal from "../sidebar/editPlaylist";
+import PlaylistEditModal from "../sidebar/editPlaylist";
 
 const Avatar = ({ src }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
   return (
-    <div className="mr-6">
-      <img
-        src={src}
-        alt="Playlist Cover"
-        className="w-48 h-48 object-cover shadow-lg m-5 rounded-sm"
+    <>
+      <div className="mr-6 relative group" onClick={handleOpenModal}>
+        <img
+          src={src || "https://via.placeholder.com/150"}
+          alt="Playlist Cover"
+          className="w-48 h-48 object-cover shadow-lg m-5 rounded-sm transition-opacity group-hover:opacity-70"
+        />
+        <div className="absolute inset-0 m-5 w-48 h-48 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-sm" />
+        <ImagePlus className="absolute top-8 left-8 w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+
+      {/* Hiển thị modal khi click */}
+      <PlaylistEditModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Rap On Trap"
+        description="Playlist A selection of carefully selected synthwave tracks to recharge your inspiration upon"
+        cover={src || "https://via.placeholder.com/150"}
       />
-    </div>
+    </>
   );
 };
 

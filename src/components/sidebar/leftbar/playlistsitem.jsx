@@ -1,8 +1,10 @@
 // SidebarPlaylists.jsx
+import { useState } from "react";
 import React from "react";
 import { Heart } from "lucide-react";
 
 const SidebarPlaylists = ({ playlists, isExpanded }) => {
+  const isplayed = useState(true);
   return (
     <div className="flex-1 overflow-y-auto">
       {!isExpanded ? (
