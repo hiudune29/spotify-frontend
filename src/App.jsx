@@ -9,12 +9,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          {/* Các route con sẽ được render bên trong Layout qua Outlet */}
-          <Route path="login" element={<LoginPage />} />
-          <Route path="signup" element={<SignUpPage />} />
-          <Route index element={<div>Trang chủ (Home Page)</div>} />
-        </Route>
+        <Route path="/" element={<Layout />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="signup" element={<SignUpPage />} />
       </Routes>
     </Router>
   );

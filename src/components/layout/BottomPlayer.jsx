@@ -10,6 +10,7 @@ import {
   FaVolumeUp,
   FaVolumeMute,
 } from "react-icons/fa";
+import { Maximize, Minimize } from "lucide-react"; // Sử dụng cả Maximize và Minimize
 
 const BottomPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -20,6 +21,7 @@ const BottomPlayer = () => {
   const [songData, setSongData] = useState(null);
   const [repeatMode, setRepeatMode] = useState(0); // 0: tắt, 1: lặp bài hiện tại, 2: lặp playlist
   const [isRandom, setIsRandom] = useState(false); // Trạng thái ngẫu nhiên
+  const [isFullScreen, setIsFullScreen] = useState(false); // Trạng thái toàn màn hình
   const audioRef = useRef(null);
 
   // Hàm giả lập chọn bài hát (sử dụng dữ liệu giả lập)
@@ -29,7 +31,7 @@ const BottomPlayer = () => {
         title: "Devil In A New Dress",
         artist: "Kanye West, Rick Ross",
         albumCover:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMFG6u6E_YgRiR4hQOm9gPEOs7N47WMzfcqQ&s",
+          "https://i.scdn.co/image/ab67616d0000b273d2a7d2231a8b3d9a9b27a5f",
         duration: 244,
         audioUrl:
           "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
@@ -40,6 +42,41 @@ const BottomPlayer = () => {
       alert("Không thể tải bài hát. Vui lòng thử lại sau.");
     }
   };
+
+  // Xử lý chuyển đổi toàn màn hình
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement
+        .requestFullscreen()
+        .then(() => {
+          setIsFullScreen(true);
+        })
+        .catch((err) => {
+          console.error("Lỗi khi vào chế độ toàn màn hình:", err);
+        });
+    } else {
+      document
+        .exitFullscreen()
+        .then(() => {
+          setIsFullScreen(false);
+        })
+        .catch((err) => {
+          console.error("Lỗi khi thoát chế độ toàn màn hình:", err);
+        });
+    }
+  };
+
+  // Cập nhật trạng thái toàn màn hình khi thay đổi
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    };
+  }, []);
 
   // Xử lý khi nhấn nút play/pause
   const togglePlayPause = () => {
@@ -176,6 +213,7 @@ const BottomPlayer = () => {
             <FaRedo />
             {repeatMode === 1 && <span className="repeat-indicator">1</span>}
           </button>
+          {/* Nút Select Song không disabled */}
           <button className="control-btn select-song-btn" onClick={selectSong}>
             Select Song
           </button>
@@ -238,8 +276,9 @@ const BottomPlayer = () => {
             disabled={!songData}
           />
         </div>
-        <button className="control-btn">
-          <img src={maximizeIcon} alt="Maximize" className="maximize-icon" />
+        {/* Nút Maximize/Minimize với chức năng toàn màn hình */}
+        <button className="control-btn maximize-btn" onClick={toggleFullScreen}>
+          {isFullScreen ? <Minimize /> : <Maximize />}
         </button>
       </div>
 

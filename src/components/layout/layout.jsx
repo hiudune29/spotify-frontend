@@ -6,15 +6,23 @@ import PlaylistContent from "../playlist/playlistcontent";
 import Rightbar from "../sidebar/rightbar/rightbar";
 import Sidebar from "../sidebar/leftbar/sidebar";
 import ContentPlaylist from "../listContent/contentPlaylist";
+import TopBar from "./TopBar";
+
 const Layout = () => {
+  console.log("Layout is rendering"); // Log để debug
   return (
-    <div className="flex h-screen bg-black text-white">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <PlaylistContent />
-        {/* <ContentPlaylist /> */}
+    <div className="layout">
+      <TopBar />
+      {/* Thêm div bọc phần chính để đảm bảo top-bar không che mất nội dung */}
+      <div className="main-container">
+        <Sidebar />
+        <div className="main-content">
+          <PlaylistContent />
+          {/* <ContentPlaylist /> */}
+          <Outlet /> {/* Điểm render các route con */}
+        </div>
+        <Rightbar />
       </div>
-      <Rightbar />
       <BottomPlayer />
     </div>
   );

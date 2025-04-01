@@ -1,3 +1,4 @@
+/* Bottom Player Container */
 .bottom-player {
   display: flex;
   align-items: center;
@@ -13,12 +14,16 @@
   left: 0;
   right: 0;
   z-index: 1000;
+  box-sizing: border-box; /* Ensure padding doesn't affect the total width */
 }
 
+/* Song Info Section */
 .song-info {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0; /* Prevent shrinking on smaller screens */
+  min-width: 200px; /* Ensure enough space for song info */
 }
 
 .song-placeholder {
@@ -55,12 +60,15 @@
   font-size: 16px;
 }
 
+/* Controls Section */
 .controls {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
   gap: 5px;
+  max-width: 600px; /* Limit the width of the controls */
+  margin: 0 10px; /* Add some spacing on the sides */
 }
 
 .control-buttons {
@@ -88,24 +96,24 @@
   cursor: not-allowed;
 }
 
-/* Hiệu ứng hover mặc định */
+/* Hover effect for control buttons */
 .control-btn:hover:not(:disabled) {
   color: #fff;
 }
 
-/* Hiệu ứng khi nút Repeat hoặc Random được kích hoạt */
+/* Active state for Repeat or Random buttons */
 .control-btn.active {
-  color: #1db954; /* Màu xanh của Spotify */
-  filter: brightness(1.2); /* Hiệu ứng sáng lên */
+  color: #1db954;
+  filter: brightness(1.2);
 }
 
-/* Vô hiệu hóa hiệu ứng hover khi nút đã ở trạng thái active */
+/* Disable hover effect when active */
 .control-btn.active:hover:not(:disabled) {
-  color: #1db954; /* Giữ nguyên màu xanh */
-  filter: brightness(1.2); /* Giữ nguyên hiệu ứng sáng */
+  color: #1db954;
+  filter: brightness(1.2);
 }
 
-/* Số "1" cho nút Repeat */
+/* Repeat indicator */
 .repeat-indicator {
   position: absolute;
   font-size: 8px;
@@ -175,10 +183,13 @@
   cursor: pointer;
 }
 
+/* Extra Controls Section */
 .extra-controls {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0; /* Prevent shrinking */
+  min-width: 150px; /* Ensure enough space for extra controls */
 }
 
 .volume-control {
@@ -217,12 +228,12 @@
   cursor: pointer;
 }
 
-/* Kiểu cho nút Select Song */
+/* Select Song Button */
 .select-song-btn {
   background: none;
   border: none;
   color: #b3b3b3;
-  font-size: 12px; /* Kích thước chữ nhỏ hơn để phù hợp */
+  font-size: 12px;
   cursor: pointer;
   padding: 0 5px;
 }
@@ -231,6 +242,7 @@
   color: #fff;
 }
 
+/* Maximize Button */
 .maximize-btn {
   background: none;
   border: none;
@@ -248,9 +260,223 @@
   color: #fff;
 }
 
-/* Kiểu cho biểu tượng maximize */
 .maximize-icon {
   width: 16px;
   height: 16px;
   object-fit: contain;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .bottom-player {
+    padding: 8px;
+    height: 55px;
+  }
+
+  .song-info {
+    min-width: 180px;
+  }
+
+  .album-cover {
+    width: 36px;
+    height: 36px;
+  }
+
+  .song-title {
+    font-size: 13px;
+  }
+
+  .song-artist {
+    font-size: 11px;
+  }
+
+  .controls {
+    max-width: 500px;
+    margin: 0 8px;
+  }
+
+  .progress-bar {
+    max-width: 500px;
+  }
+
+  .extra-controls {
+    min-width: 130px;
+  }
+
+  .volume-slider {
+    width: 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bottom-player {
+    padding: 6px;
+    height: 50px;
+  }
+
+  .song-info {
+    min-width: 150px;
+    gap: 8px;
+  }
+
+  .album-cover {
+    width: 32px;
+    height: 32px;
+  }
+
+  .song-title {
+    font-size: 12px;
+  }
+
+  .song-artist {
+    font-size: 10px;
+  }
+
+  .controls {
+    max-width: 400px;
+    margin: 0 6px;
+  }
+
+  .control-buttons {
+    gap: 10px;
+  }
+
+  .control-btn {
+    font-size: 14px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .play-pause-btn {
+    font-size: 18px;
+  }
+
+  .progress-bar {
+    max-width: 400px;
+  }
+
+  .current-time,
+  .remaining-time {
+    font-size: 10px;
+  }
+
+  .progress-slider::-webkit-slider-thumb,
+  .progress-slider::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+  }
+
+  .extra-controls {
+    min-width: 100px;
+    gap: 6px;
+  }
+
+  .volume-slider {
+    width: 40px;
+  }
+
+  .select-song-btn {
+    font-size: 10px;
+  }
+
+  .maximize-btn {
+    font-size: 14px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .maximize-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bottom-player {
+    padding: 5px;
+    height: 45px;
+  }
+
+  .song-info {
+    min-width: 120px;
+    gap: 6px;
+  }
+
+  .album-cover {
+    width: 28px;
+    height: 28px;
+  }
+
+  .song-title {
+    font-size: 11px;
+  }
+
+  .song-artist {
+    font-size: 9px;
+  }
+
+  .controls {
+    max-width: 300px;
+    margin: 0 5px;
+  }
+
+  .control-buttons {
+    gap: 8px;
+  }
+
+  .control-btn {
+    font-size: 12px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .play-pause-btn {
+    font-size: 16px;
+  }
+
+  .progress-bar {
+    max-width: 300px;
+  }
+
+  .current-time,
+  .remaining-time {
+    font-size: 9px;
+  }
+
+  .progress-slider::-webkit-slider-thumb,
+  .progress-slider::-moz-range-thumb {
+    width: 8px;
+    height: 8px;
+  }
+
+  .extra-controls {
+    min-width: 80px;
+    gap: 4px;
+  }
+
+  .volume-slider {
+    width: 30px;
+  }
+
+  .volume-slider::-webkit-slider-thumb,
+  .volume-slider::-moz-range-thumb {
+    width: 8px;
+    height: 8px;
+  }
+
+  .select-song-btn {
+    font-size: 9px;
+    padding: 0 3px;
+  }
+
+  .maximize-btn {
+    font-size: 12px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .maximize-icon {
+    width: 12px;
+    height: 12px;
+  }
 }
