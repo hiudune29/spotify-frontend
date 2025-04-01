@@ -1,12 +1,19 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import TopBar from "./TopBar";
+import BottomPlayer from "./BottomPlayer";
+import "./layout.css";
 
 const Layout = () => {
-    return (
-        <div className="container mx-auto">
-            <Outlet />
-            <h1>Layout</h1>
-        </div>
-    );
-}
+  return (
+    <div className="layout">
+      <TopBar />
+      <main>
+        <Outlet />
+      </main>
+      <BottomPlayer />
+    </div>
+  );
+};
+
 export default Layout;
