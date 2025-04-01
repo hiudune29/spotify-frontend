@@ -6,7 +6,6 @@ import SignUpPage from "./pages/signup";
 import UserProfile from "./pages/UserProfile/UserProfile";
 
 function App() {
-
   return (
     <Router>
       <Routes>
