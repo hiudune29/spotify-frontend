@@ -230,3 +230,27 @@
 .select-song-btn:hover:not(:disabled) {
   color: #fff;
 }
+
+.maximize-btn {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.maximize-btn:hover {
+  color: #fff;
+}
+
+/* Kiểu cho biểu tượng maximize */
+.maximize-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}

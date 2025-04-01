@@ -29,7 +29,7 @@ const BottomPlayer = () => {
         title: "Devil In A New Dress",
         artist: "Kanye West, Rick Ross",
         albumCover:
-          "https://i.scdn.co/image/ab67616d0000b273d2a7d2231a8b3d9a9b27a5f",
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMFG6u6E_YgRiR4hQOm9gPEOs7N47WMzfcqQ&s",
         duration: 244,
         audioUrl:
           "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
@@ -218,15 +218,6 @@ const BottomPlayer = () => {
 
       {/* Phần điều khiển bên phải (âm lượng, v.v.) */}
       <div className="extra-controls">
-        <button className="control-btn" disabled={!songData}>
-          📜
-        </button>
-        <button className="control-btn" disabled={!songData}>
-          ✏️
-        </button>
-        <button className="control-btn" disabled={!songData}>
-          ≡
-        </button>
         <button
           className="control-btn"
           onClick={toggleMute}
@@ -247,12 +238,8 @@ const BottomPlayer = () => {
             disabled={!songData}
           />
         </div>
-
-        <button className="control-btn" disabled={!songData}>
-          🖥️
-        </button>
-        <button className="control-btn" disabled={!songData}>
-          ↗️
+        <button className="control-btn">
+          <img src={maximizeIcon} alt="Maximize" className="maximize-icon" />
         </button>
       </div>
 
