@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import SpotifyIcon from "../components/ui/spotify-icon";
-import EmailStep from "../components/signup/signup-form/step-email";
-import PasswordStep from "../components/signup/signup-form/step-password";
+// import EmailStep from "../components/signup/signup-form/step-email";
+// import PasswordStep from "../components/signup/signup-form/step-password";
 
 const SignUpPage = () => {
     const [step, setStep] = useState(1);
