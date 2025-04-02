@@ -22,7 +22,8 @@ const Layout = () => {
 
         {/* Playlist Content */}
         <div className="flex-1 overflow-y-auto">
-          <ContentPlaylist />
+          {/* <ContentPlaylist /> */}
+          <PlaylistContent />
         </div>
 
         {/* Rightbar */}
