@@ -18,9 +18,8 @@ const Layout = () => {
         <Sidebar />
         <div className="main-content">
           <PlaylistContent />
-          <PlaylistContent />
-          <ContentPlaylist />
-          <UserProfile />
+          {/* <ContentPlaylist /> */}
+          {/* <UserProfile /> */}
           <Outlet />
         </div>
         <Rightbar />
