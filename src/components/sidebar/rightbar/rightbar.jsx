@@ -6,7 +6,7 @@ import MarqueeSpan from "./marqueSpan.jsx";
 
 const Rightbar = () => {
   return (
-    <div className="h-full flex flex-col mx-3 bg-[#121212] rounded-xl text-white">
+    <div className="h-full flex flex-col mx-3 bg-[#121212] rounded-xl text-white w-[20%]">
       <Header />
       <Video />
       <div className="flex flex-row justify-between px-4">
