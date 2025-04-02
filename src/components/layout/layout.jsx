@@ -1,7 +1,5 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
 import BottomPlayer from "./BottomPlayer";
-import "./layout.css";
 import PlaylistContent from "../playlist/playlistcontent";
 import Rightbar from "../sidebar/rightbar/rightbar";
 import Sidebar from "../sidebar/leftbar/sidebar";
@@ -10,22 +8,31 @@ import UserProfile from "../../pages/UserProfile/UserProfile";
 import TopBar from "./TopBar";
 
 const Layout = () => {
-  console.log("Layout is rendering");
   return (
-    <div className="layout">
-      <TopBar />
-      <div className="main-container">
-        <Sidebar />
-        <div className="main-content">
-          <PlaylistContent />
-          {/* <ContentPlaylist /> */}
-          {/* <UserProfile /> */}
-          <Outlet />
-        </div>
-        <Rightbar />
-
+    <div className="flex flex-col h-screen bg-black text-white">
+      {/* Top Bar */}
+      <div className="fixed top-0 left-0 w-full z-10">
+        <TopBar />
       </div>
-      <BottomPlayer />
+
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden pt-16 pb-16">
+        {/* Sidebar */}
+        <Sidebar />
+
+        {/* Playlist Content */}
+        <div className="flex-1 overflow-y-auto">
+          <ContentPlaylist />
+        </div>
+
+        {/* Rightbar */}
+        <Rightbar />
+      </div>
+
+      {/* Bottom Player */}
+      <div className="fixed bottom-0 left-0 w-full z-10">
+        <BottomPlayer />
+      </div>
     </div>
   );
 };
