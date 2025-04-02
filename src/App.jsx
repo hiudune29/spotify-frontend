@@ -4,14 +4,14 @@ import Layout from "./components/layout/layout";
 import "./App.scss";
 import LoginPage from "./pages/auth/login";
 import SignUpPage from "./pages/auth/signup";
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route path="login" element={<LoginPage />} />
-          <Route path="signup" element={<SignUpPage />} />
-        </Route>
+        <Route path="/" element={<Layout />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="signup" element={<SignUpPage />} />
       </Routes>
     </Router>
   );
