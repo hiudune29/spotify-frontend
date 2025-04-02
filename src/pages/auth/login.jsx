@@ -29,12 +29,14 @@ const LoginPage = () => {
 
         {/* Forgot Password */}
         <div className="text-center">
-          <a
-            href="#"
-            className="text-sm text-white underline  hover:text-[#1DB954]"
+          <button
+            onClick={() =>
+              alert("Forgot password functionality not implemented yet.")
+            }
+            className="text-sm text-white underline hover:text-[#1DB954] bg-transparent border-none cursor-pointer"
           >
             Quên mật khẩu của bạn?
-          </a>
+          </button>
         </div>
 
         {/* Register Link */}
