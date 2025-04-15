@@ -1,58 +1,44 @@
 import SpotifyIcon from "../../components/ui/spotify-icon";
 import LoginForm from "../../components/login/loginForm";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import SocialLoginButtons from "../../components/ui/social-button";
 
 const LoginPage = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black p-4">
-      <div className="w-full max-w-md space-y-8 rounded-lg p-6">
-        {/* Spotify Logo */}
-        <SpotifyIcon />
+    <GoogleOAuthProvider clientId="474604047510-k2b2ejrdjnvj96p7b565fh80i3sm9o8e.apps.googleusercontent.com">
+      <div className="flex min-h-screen items-center justify-center bg-black p-4">
+        <div className="w-full max-w-md space-y-8 rounded-lg p-6">
+          <SpotifyIcon />
 
-        {/* Heading Label*/}
-        <h1 className="text-center text-3xl font-bold text-white">
-          Đăng nhập vào Spotify
-        </h1>
+          <h1 className="text-center text-3xl font-bold text-white">
+            Đăng nhập vào Spotify
+          </h1>
 
-        {/* Social Login Buttons */}
-        <SocialLoginButtons />
+          <SocialLoginButtons />
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center ">
-            <div className="w-full border-t border-gray-600"></div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center ">
+              <div className="w-full border-t border-gray-600"></div>
+            </div>
+          </div>
+          <br />
+
+          <LoginForm />
+
+          <div className="text-center">
+            <p className="text-sm text-gray-400">
+              Bạn chưa có tài khoản?{" "}
+              <a
+                href="/signup"
+                className="text-white underline hover:text-[#1DB954]"
+              >
+                Đăng ký Spotify
+              </a>
+            </p>
           </div>
         </div>
-        <br />
-
-        {/* Login Form */}
-        <LoginForm />
-
-        {/* Forgot Password */}
-        <div className="text-center">
-          <button
-            onClick={() =>
-              alert("Forgot password functionality not implemented yet.")
-            }
-            className="text-sm text-white underline hover:text-[#1DB954] bg-transparent border-none cursor-pointer"
-          >
-            Quên mật khẩu của bạn?
-          </button>
-        </div>
-
-        {/* Register Link */}
-        <div className="text-center">
-          <p className="text-sm text-gray-400">
-            Bạn chưa có tài khoản?{" "}
-            <a
-              href="/signup"
-              className="text-white underline hover:text-[#1DB954]"
-            >
-              Đăng ký Spotify
-            </a>
-          </p>
-        </div>
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 };
 

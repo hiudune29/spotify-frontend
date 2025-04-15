@@ -12,10 +12,12 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.6.1",
     "@tailwindcss/postcss": "^4.0.14",
     "@tailwindcss/vite": "^4.0.14",
     "antd": "^5.24.4",
+    "axios": "^1.8.4",
     "heroicons": "^2.2.0",
     "lucide-react": "^0.483.0",
     "react": "^19.0.0",
