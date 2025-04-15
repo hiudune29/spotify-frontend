@@ -57,6 +57,7 @@ const userSlice = createSlice({
   initialState: {
     userInfo: null,
     userId: null,
+    role: null,
     loading: false,
     error: null,
   },
@@ -64,6 +65,7 @@ const userSlice = createSlice({
     clearUser: (state) => {
       state.userInfo = null;
       state.userId = null;
+      state.role = null;
       state.error = null;
       localStorage.removeItem("token");
     },
@@ -77,6 +79,7 @@ const userSlice = createSlice({
       .addCase(fetchUserInfo.fulfilled, (state, action) => {
         state.loading = false;
         state.userInfo = action.payload;
+        state.role = action.payload.role || null;
         const token = localStorage.getItem("token");
         state.userId = token ? decodeJwt(token) : null;
       })
@@ -85,6 +88,7 @@ const userSlice = createSlice({
         state.error = action.payload;
         state.userInfo = null;
         state.userId = null;
+        state.role = null;
         localStorage.removeItem("token");
       });
   },

@@ -1,13 +1,15 @@
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook, FaApple, FaPhone } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useNavigate } from "react-router-dom"; // Thêm useNavigate
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux"; // Thêm useDispatch
 import axios from "axios";
+import { fetchUserInfo } from "../../redux/slice/userSlice"; // Import fetchUserInfo
 
 const providers = [{ name: "Google", icon: <FcGoogle className="h-5 w-5" /> }];
 
 const SocialLoginButtons = ({ signUp = false, setError }) => {
-  const navigate = useNavigate(); // Sử dụng useNavigate
+  const navigate = useNavigate();
+  const dispatch = useDispatch(); // Khởi tạo useDispatch
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (credentialResponse) => {
@@ -25,7 +27,18 @@ const SocialLoginButtons = ({ signUp = false, setError }) => {
         );
         if (response.status === 200) {
           localStorage.setItem("token", response.data);
-          navigate("/"); // Chuyển hướng tới /
+
+          // Gọi fetchUserInfo để lấy thông tin người dùng
+          const result = await dispatch(fetchUserInfo()).unwrap();
+
+          // Chuyển hướng dựa trên role
+          if (result.role === "ADMIN") {
+            navigate("/admin");
+          } else if (result.role === "USER") {
+            navigate("/");
+          } else {
+            setError?.("Vai trò không hợp lệ.");
+          }
         }
       } catch (err) {
         setError?.(

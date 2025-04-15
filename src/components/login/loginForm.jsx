@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Thêm useNavigate
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux"; // Thêm useDispatch
 import EmailField from "../ui/email-input";
 import PasswordField from "../ui/password-input";
 import axios from "axios";
+import { fetchUserInfo } from "../../redux/slice/userSlice"; // Import fetchUserInfo
 
-const LoginForm = () => {
+const LoginForm = ({ setError: setParentError }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // Sử dụng useNavigate
+  const navigate = useNavigate();
+  const dispatch = useDispatch(); // Khởi tạo useDispatch
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,12 +28,25 @@ const LoginForm = () => {
 
       if (response.status === 200) {
         localStorage.setItem("token", response.data);
-        navigate("/"); // Chuyển hướng tới /
+
+        // Gọi fetchUserInfo để lấy thông tin người dùng
+        const result = await dispatch(fetchUserInfo()).unwrap();
+
+        // Chuyển hướng dựa trên role
+        if (result.role === "ADMIN") {
+          navigate("/admin");
+        } else if (result.role === "USER") {
+          navigate("/");
+        } else {
+          setError("Vai trò không hợp lệ.");
+          setParentError("Vai trò không hợp lệ.");
+        }
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại."
-      );
+      const errorMessage =
+        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
+      setError(errorMessage);
+      setParentError(errorMessage);
     }
   };
 

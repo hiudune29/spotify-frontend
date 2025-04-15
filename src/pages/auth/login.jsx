@@ -17,10 +17,9 @@ const LoginPage = () => {
             Đăng nhập vào Spotify
           </h1>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          <SocialLoginButtons signUp={false} setError={setError} />{" "}
-          {/* Thêm signUp={false} để phân biệt với đăng ký */}
+          <SocialLoginButtons signUp={false} setError={setError} />
           <DividerWithText text="hoặc" />
-          <LoginForm />
+          <LoginForm setError={setError} /> {/* Truyền setError */}
           <div className="text-center">
             <p className="text-sm text-gray-400">
               Bạn chưa có tài khoản?{" "}
