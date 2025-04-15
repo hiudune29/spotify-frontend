@@ -86,9 +86,13 @@ const CenterSection = () => {
 // Right Icon Group Component (Profile Icon + Menu)
 const RightIconGroup = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
@@ -100,7 +104,9 @@ const RightIconGroup = () => {
         <div className="menu">
           <div className="menu-item">Account</div>
           <div className="menu-item">Profile</div>
-          <div className="menu-item">Log out</div>
+          <div className="menu-item" onClick={handleLogout}>
+            Log out
+          </div>
         </div>
       )}
     </div>

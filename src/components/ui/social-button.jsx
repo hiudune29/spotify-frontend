@@ -1,14 +1,17 @@
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaApple, FaPhone } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useNavigate } from "react-router-dom"; // Thêm useNavigate
 import axios from "axios";
 
 const providers = [{ name: "Google", icon: <FcGoogle className="h-5 w-5" /> }];
 
 const SocialLoginButtons = ({ signUp = false, setError }) => {
+  const navigate = useNavigate(); // Sử dụng useNavigate
+
   const googleLogin = useGoogleLogin({
     onSuccess: async (credentialResponse) => {
-      console.log("Google Sign-In Success:", credentialResponse); // Debug
+      console.log("Google Sign-In Success:", credentialResponse);
       if (!credentialResponse.access_token) {
         setError?.("Không lấy được access token từ Google. Vui lòng thử lại.");
         return;
@@ -17,31 +20,32 @@ const SocialLoginButtons = ({ signUp = false, setError }) => {
       try {
         const response = await axios.post(
           "http://localhost:8082/api/auth/google",
-          { accessToken: credentialResponse.access_token }, // Gửi accessToken
+          { accessToken: credentialResponse.access_token },
           { withCredentials: true }
         );
         if (response.status === 200) {
-          window.location.href = "/";
+          localStorage.setItem("token", response.data);
+          navigate("/"); // Chuyển hướng tới /
         }
       } catch (err) {
         setError?.(
           err.response?.data?.message ||
-            "Đăng ký bằng Google thất bại. Vui lòng thử lại."
+            "Đăng nhập bằng Google thất bại. Vui lòng thử lại."
         );
       }
     },
     onError: () => {
-      console.log("Google Sign-In Error"); // Debug
-      setError?.("Đăng ký bằng Google thất bại. Vui lòng thử lại.");
+      console.log("Google Sign-In Error");
+      setError?.("Đăng nhập bằng Google thất bại. Vui lòng thử lại.");
     },
     onNonOAuthError: (error) => {
-      console.log("Non-OAuth Error:", error); // Debug
+      console.log("Non-OAuth Error:", error);
       setError?.("Đăng nhập Google bị hủy hoặc gặp lỗi. Vui lòng thử lại.");
     },
   });
 
   const handleLogin = (provider) => {
-    console.log("Handle login for provider:", provider); // Debug
+    console.log("Handle login for provider:", provider);
     if (provider === "Google") {
       googleLogin();
     } else {
