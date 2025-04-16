@@ -23,11 +23,12 @@ const Layout = () => {
         {/* Playlist Content */}
         <div className="flex-1 overflow-y-auto">
           {/* <ContentPlaylist /> */}
-          <PlaylistContent />
+          <UserProfile />
+          {/* <PlaylistContent /> */}
         </div>
 
         {/* Rightbar */}
-        <Rightbar />
+        {/* <Rightbar />   */}
       </div>
 
       {/* Bottom Player */}

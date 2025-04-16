@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAlbums, toggleAlbumStatus } from "../../redux/slice/albumSlice"; // Giả sử bạn có action này
+import {
+  fetchAlbums,
+  toggleAlbumStatus,
+} from "../../../redux/slice/albumSlice"; // Giả sử bạn có action này
 import { Table, Button, Space } from "antd";
-
+import AdminTable from "../../../components/admin/ui/Table"; // Giả sử bạn có component này
 const Album = () => {
   const dispatch = useDispatch();
   const [filteredInfo, setFilteredInfo] = useState({});
@@ -128,17 +131,14 @@ const Album = () => {
         <Button onClick={clearFilters}>Clear filters</Button>
         <Button onClick={clearAll}>Clear filters and sorters</Button>
       </Space>
-      <Table
+      <AdminTable
         columns={columns}
         dataSource={albums}
         rowKey="albumId"
-        pagination={{
-          current: pageNo + 1,
-          pageSize: pageSize,
-          total: totalElements,
-          showSizeChanger: true,
-        }}
-        onChange={handleChange}
+        handleChange={handleChange}
+        pageNo={pageNo}
+        pageSize={pageSize}
+        totalElements={totalElements}
       />
     </div>
   );

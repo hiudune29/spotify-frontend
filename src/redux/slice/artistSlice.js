@@ -16,6 +16,30 @@ export const fetchArtists = createAsyncThunk(
     }
   }
 );
+export const fetchArtistsSelect = createAsyncThunk(
+  "artist/fetchArtistsSelect",
+  async (thunkAPI) => {
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/api/artist/allstatus",
+        {
+          params: {
+            pageNo: 0,
+            pageSize: 1000, // để lấy tất cả
+            sortBy: "name",
+            sortDir: "asc",
+            status: true, // hoặc false tùy bạn muốn lấy active hay đã bị disable
+          },
+        }
+      );
+      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Fetch failed"
+      );
+    }
+  }
+);
 export const toggleArtistStatus = createAsyncThunk(
   "artist/updateStatus",
   async (artistId, { rejectWithValue }) => {
@@ -34,26 +58,21 @@ const artistSlice = createSlice({
   name: "artist",
   initialState: {
     items: [],
-    loading: false,
-    error: null,
   },
   reducers: {
     // Nếu có thêm action khác như add/update/delete thì viết ở đây
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchArtists.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
+      // lấy dữ liệu all artist
       .addCase(fetchArtists.fulfilled, (state, action) => {
-        state.loading = false;
         state.items = action.payload;
       })
-      .addCase(fetchArtists.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+      //lấy dữ liệu all artist Select
+      .addCase(fetchArtistsSelect.fulfilled, (state, action) => {
+        state.items = action.payload;
       })
+      // xử lý true/false status
       .addCase(toggleArtistStatus.fulfilled, (state, action) => {
         const updatedArtist = action.payload;
 
@@ -77,5 +96,9 @@ const artistSlice = createSlice({
       });
   },
 });
+
+export const selectItemsArtist = (state) => {
+  return state.artist.items; // trả về mảng artist
+};
 
 export default artistSlice.reducer;
