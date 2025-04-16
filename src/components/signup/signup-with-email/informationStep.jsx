@@ -4,19 +4,16 @@ import ErrorMessage from "../../ui/error-message";
 
 const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
   const [formData, setFormData] = useState({
-    name: userData.name || "",
-    day: userData.birthdate ? new Date(userData.birthdate).getDate() : "",
-    month: userData.birthdate
-      ? new Date(userData.birthdate).getMonth() + 1
-      : "",
-    year: userData.birthdate ? new Date(userData.birthdate).getFullYear() : "",
-    gender: userData.gender || "",
+    userName: userData.userName || "",
+    fullname: userData.fullname || "",
+    day: userData.dob ? new Date(userData.dob).getDate() : "",
+    month: userData.dob ? new Date(userData.dob).getMonth() + 1 : "",
+    year: userData.dob ? new Date(userData.dob).getFullYear() : "",
   });
 
   const [errors, setErrors] = useState({});
   const [isValid, setIsValid] = useState(false);
 
-  // Tạo các option cho dropdown tháng
   const months = [
     { value: 1, label: "Tháng 1" },
     { value: 2, label: "Tháng 2" },
@@ -32,7 +29,6 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
     { value: 12, label: "Tháng 12" },
   ];
 
-  // Tạo các option cho dropdown ngày
   const getDaysInMonth = (month, year) => {
     return new Date(year, month, 0).getDate();
   };
@@ -50,16 +46,19 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
     return Array.from({ length: daysCount }, (_, i) => i + 1);
   }, [formData.month, formData.year]);
 
-  // Kiểm tra form hợp lệ
   useEffect(() => {
     const newErrors = {};
 
-    if (!formData.name) {
-      newErrors.name = "Vui lòng nhập tên của bạn";
+    if (!formData.userName) {
+      newErrors.userName = "Vui lòng nhập tên người dùng";
+    }
+
+    if (!formData.fullname) {
+      newErrors.fullname = "Vui lòng nhập họ tên của bạn";
     }
 
     if (!formData.day || !formData.month || !formData.year) {
-      newErrors.birthdate = "Vui lòng chọn ngày sinh đầy đủ";
+      newErrors.dob = "Vui lòng chọn ngày sinh đầy đủ";
     } else {
       const birthDate = new Date(
         formData.year,
@@ -67,15 +66,11 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
         formData.day
       );
       const minBirthDate = new Date();
-      minBirthDate.setFullYear(minBirthDate.getFullYear() - 13); // Ngày tối thiểu để đủ 13 tuổi
+      minBirthDate.setFullYear(minBirthDate.getFullYear() - 13);
 
       if (birthDate > minBirthDate) {
-        newErrors.birthdate = "Bạn phải đủ 13 tuổi để đăng ký";
+        newErrors.dob = "Bạn phải đủ 13 tuổi để đăng ký";
       }
-    }
-
-    if (!formData.gender) {
-      newErrors.gender = "Vui lòng chọn giới tính";
     }
 
     setErrors(newErrors);
@@ -95,17 +90,14 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
 
     if (!isValid) return;
 
-    // Tạo chuỗi ngày tháng từ các trường riêng lẻ
-    const birthdate = new Date(
-      formData.year,
-      formData.month - 1,
-      formData.day
-    ).toISOString();
+    const dob = new Date(formData.year, formData.month - 1, formData.day)
+      .toISOString()
+      .split("T")[0];
 
     updateUserData({
-      name: formData.name,
-      birthdate,
-      gender: formData.gender,
+      userName: formData.userName,
+      fullname: formData.fullname,
+      dob,
     });
 
     nextStep();
@@ -118,20 +110,30 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Họ tên */}
+        <div className="space-y-1">
+          <InputField
+            label="Tên người dùng"
+            name="userName"
+            value={formData.userName}
+            onChange={handleChange}
+            error={errors.userName}
+            placeholder="Nhập tên người dùng"
+          />
+          {errors.userName && <ErrorMessage message={errors.userName} />}
+        </div>
+
         <div className="space-y-1">
           <InputField
             label="Họ tên"
-            name="name"
-            value={formData.name}
+            name="fullname"
+            value={formData.fullname}
             onChange={handleChange}
-            error={errors.name}
+            error={errors.fullname}
             placeholder="Nhập họ tên của bạn"
           />
-          {errors.name && <ErrorMessage message={errors.name} />}
+          {errors.fullname && <ErrorMessage message={errors.fullname} />}
         </div>
 
-        {/* Ngày sinh */}
         <div>
           <label className="block text-sm font-medium text-white mb-2">
             Ngày sinh
@@ -143,7 +145,7 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
                 value={formData.day}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 rounded-md bg-[#121212] text-white border ${
-                  errors.birthdate ? "border-red-500" : "border-gray-600"
+                  errors.dob ? "border-red-500" : "border-gray-600"
                 } focus:outline-none focus:ring-2 focus:ring-green-500`}
               >
                 <option value="">Ngày</option>
@@ -160,7 +162,7 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
                 value={formData.month}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 rounded-md bg-[#121212] text-white border ${
-                  errors.birthdate ? "border-red-500" : "border-gray-600"
+                  errors.dob ? "border-red-500" : "border-gray-600"
                 } focus:outline-none focus:ring-2 focus:ring-green-500`}
               >
                 <option value="">Tháng</option>
@@ -177,7 +179,7 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
                 value={formData.year}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 rounded-md bg-[#121212] text-white border ${
-                  errors.birthdate ? "border-red-500" : "border-gray-600"
+                  errors.dob ? "border-red-500" : "border-gray-600"
                 } focus:outline-none focus:ring-2 focus:ring-green-500`}
               >
                 <option value="">Năm</option>
@@ -189,71 +191,8 @@ const InformationStep = ({ nextStep, prevStep, userData, updateUserData }) => {
               </select>
             </div>
           </div>
-          {errors.birthdate && (
-            <p className="mt-2 text-sm text-red-500">{errors.birthdate}</p>
-          )}
-        </div>
-
-        {/* Giới tính */}
-        <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            Giới tính
-          </label>
-          <div className="grid grid-cols-3 gap-3">
-            <label
-              className={`flex items-center justify-center px-4 py-3 rounded-md border ${
-                formData.gender === "male"
-                  ? "border-green-500 bg-[#1A3D2C]"
-                  : "border-gray-600 bg-[#121212]"
-              } cursor-pointer`}
-            >
-              <input
-                type="radio"
-                name="gender"
-                value="male"
-                checked={formData.gender === "male"}
-                onChange={handleChange}
-                className="sr-only"
-              />
-              <span className="text-white">Nam</span>
-            </label>
-            <label
-              className={`flex items-center justify-center px-4 py-3 rounded-md border ${
-                formData.gender === "female"
-                  ? "border-green-500 bg-[#1A3D2C]"
-                  : "border-gray-600 bg-[#121212]"
-              } cursor-pointer`}
-            >
-              <input
-                type="radio"
-                name="gender"
-                value="female"
-                checked={formData.gender === "female"}
-                onChange={handleChange}
-                className="sr-only"
-              />
-              <span className="text-white">Nữ</span>
-            </label>
-            <label
-              className={`flex items-center justify-center px-4 py-3 rounded-md border ${
-                formData.gender === "other"
-                  ? "border-green-500 bg-[#1A3D2C]"
-                  : "border-gray-600 bg-[#121212]"
-              } cursor-pointer`}
-            >
-              <input
-                type="radio"
-                name="gender"
-                value="other"
-                checked={formData.gender === "other"}
-                onChange={handleChange}
-                className="sr-only"
-              />
-              <span className="text-white">Khác</span>
-            </label>
-          </div>
-          {errors.gender && (
-            <p className="mt-2 text-sm text-red-500">{errors.gender}</p>
+          {errors.dob && (
+            <p className="mt-2 text-sm text-red-500">{errors.dob}</p>
           )}
         </div>
 

@@ -1,4 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  playNextSong,
+  playPreviousSong,
+  togglePlay,
+} from "../../redux/slice/playlistSlice";
 import "./BottomPlayer.css";
 import {
   FaPlay,
@@ -10,38 +16,23 @@ import {
   FaVolumeUp,
   FaVolumeMute,
 } from "react-icons/fa";
-import { Maximize, Minimize } from "lucide-react"; // Sử dụng cả Maximize và Minimize
+import { Maximize, Minimize } from "lucide-react";
 
 const BottomPlayer = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const dispatch = useDispatch();
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(50);
   const [previousVolume, setPreviousVolume] = useState(50);
   const [isMuted, setIsMuted] = useState(false);
-  const [songData, setSongData] = useState(null);
   const [repeatMode, setRepeatMode] = useState(0); // 0: tắt, 1: lặp bài hiện tại, 2: lặp playlist
   const [isRandom, setIsRandom] = useState(false); // Trạng thái ngẫu nhiên
   const [isFullScreen, setIsFullScreen] = useState(false); // Trạng thái toàn màn hình
   const audioRef = useRef(null);
 
-  // Hàm giả lập chọn bài hát (sử dụng dữ liệu giả lập)
-  const selectSong = async () => {
-    try {
-      const mockData = {
-        title: "Devil In A New Dress",
-        artist: "Kanye West, Rick Ross",
-        albumCover:
-          "https://i.scdn.co/image/ab67616d0000b273d2a7d2231a8b3d9a9b27a5f",
-        duration: 244,
-        audioUrl:
-          "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-      };
-      setSongData(mockData);
-    } catch (error) {
-      console.error("Error setting mock song data:", error);
-      alert("Không thể tải bài hát. Vui lòng thử lại sau.");
-    }
-  };
+  // Lấy currentSong từ Redux
+  const { currentSong, currentPlaylist, isPlaying } = useSelector(
+    (state) => state.playlists
+  );
 
   // Xử lý chuyển đổi toàn màn hình
   const toggleFullScreen = () => {
@@ -78,20 +69,40 @@ const BottomPlayer = () => {
     };
   }, []);
 
+  // Cập nhật khi currentSong thay đổi
+  useEffect(() => {
+    if (currentSong && audioRef.current) {
+      audioRef.current.src = currentSong.fileUpload;
+      if (isPlaying) {
+        audioRef.current
+          .play()
+          .catch((error) => console.error("Lỗi khi phát nhạc:", error));
+      }
+    }
+  }, [currentSong]);
+
+  // Cập nhật khi isPlaying thay đổi
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current
+          .play()
+          .catch((error) => console.error("Lỗi khi phát nhạc:", error));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
   // Xử lý khi nhấn nút play/pause
   const togglePlayPause = () => {
-    if (!songData) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
+    if (!currentSong) return;
+    dispatch(togglePlay(!isPlaying));
   };
 
   // Xử lý tua thời gian
   const handleTimeChange = (e) => {
-    if (!songData) return;
+    if (!currentSong) return;
     const newTime = e.target.value;
     setCurrentTime(newTime);
     audioRef.current.currentTime = newTime;
@@ -99,7 +110,7 @@ const BottomPlayer = () => {
 
   // Xử lý thay đổi âm lượng
   const handleVolumeChange = (e) => {
-    if (!songData) return;
+    if (!currentSong) return;
     const newVolume = e.target.value;
     setVolume(newVolume);
     setPreviousVolume(newVolume);
@@ -111,7 +122,7 @@ const BottomPlayer = () => {
 
   // Xử lý bật/tắt âm thanh
   const toggleMute = () => {
-    if (!songData) return;
+    if (!currentSong) return;
     if (isMuted) {
       setVolume(previousVolume);
       if (audioRef.current) {
@@ -129,13 +140,13 @@ const BottomPlayer = () => {
 
   // Xử lý nút Repeat
   const toggleRepeat = () => {
-    if (!songData) return;
+    if (!currentSong) return;
     setRepeatMode((prevMode) => (prevMode + 1) % 3);
   };
 
   // Xử lý nút Random
   const toggleRandom = () => {
-    if (!songData) return;
+    if (!currentSong) return;
     setIsRandom((prev) => !prev);
   };
 
@@ -159,19 +170,41 @@ const BottomPlayer = () => {
     }
   }, [volume]);
 
+  // Thêm handlers cho next và previous
+  const handleNextSong = () => {
+    if (!currentSong || !currentPlaylist?.songs?.length) return;
+    dispatch(playNextSong());
+  };
+
+  const handlePreviousSong = () => {
+    if (!currentSong || !currentPlaylist?.songs?.length) return;
+    dispatch(playPreviousSong());
+  };
+
+  const handleSongEnded = () => {
+    const index = currentPlaylist.songs.findIndex(
+      (s) => s.songId === currentSong.songId
+    );
+    if (index < currentPlaylist.songs.length - 1) {
+      dispatch(playNextSong());
+    } else {
+      dispatch(togglePlay(false)); // Dừng khi hết playlist
+    }
+  };
+
   return (
     <div className="bottom-player">
       {/* Phần thông tin bài nhạc */}
-      {songData ? (
+      {currentSong ? (
         <div className="song-info">
           <img
-            src={songData.albumCover}
+            src={currentSong.img}
             alt="Album cover"
             className="album-cover"
           />
           <div className="song-details">
-            <span className="song-title">{songData.title}</span>
-            <span className="song-artist">{songData.artist}</span>
+            <span className="song-title">{currentSong.songName}</span>
+            <span className="song-artist">{currentSong.artistName}</span>
           </div>
           <div className="check-icon">✔</div>
         </div>
@@ -188,53 +221,57 @@ const BottomPlayer = () => {
           <button
             className={`control-btn ${isRandom ? "active" : ""}`}
             onClick={toggleRandom}
-            disabled={!songData}
+            disabled={!currentSong}
           >
             <FaRandom />
           </button>
-          <button className="control-btn" disabled={!songData}>
+          <button
+            className="control-btn"
+            onClick={handlePreviousSong}
+            disabled={!currentSong || !currentPlaylist?.songs?.length}
+          >
             <FaStepBackward />
           </button>
           <button
             className="play-pause-btn"
             onClick={togglePlayPause}
-            disabled={!songData}
+            disabled={!currentSong}
           >
             {isPlaying ? <FaPause /> : <FaPlay />}
           </button>
-          <button className="control-btn" disabled={!songData}>
+          <button
+            className="control-btn"
+            onClick={handleNextSong}
+            disabled={!currentSong || !currentPlaylist?.songs?.length}
+          >
             <FaStepForward />
           </button>
           <button
             className={`control-btn ${repeatMode > 0 ? "active" : ""}`}
             onClick={toggleRepeat}
-            disabled={!songData}
+            disabled={!currentSong}
           >
             <FaRedo />
             {repeatMode === 1 && <span className="repeat-indicator">1</span>}
-          </button>
-          {/* Nút Select Song không disabled */}
-          <button className="control-btn select-song-btn" onClick={selectSong}>
-            Select Song
           </button>
         </div>
 
         {/* Thanh thời gian */}
         <div className="progress-bar">
-          {songData ? (
+          {currentSong ? (
             <>
               <span className="current-time">{formatTime(currentTime)}</span>
               <input
                 type="range"
                 min="0"
-                max={songData.duration}
+                max={currentSong.duration || 244} // Giả sử duration có sẵn, nếu không thì mặc định 244 giây
                 value={currentTime}
                 onChange={handleTimeChange}
                 className="progress-slider"
-                disabled={!songData}
+                disabled={!currentSong}
               />
               <span className="remaining-time">
-                -{formatTime(songData.duration - currentTime)}
+                -{formatTime((currentSong.duration || 244) - currentTime)}
               </span>
             </>
           ) : (
@@ -259,7 +296,7 @@ const BottomPlayer = () => {
         <button
           className="control-btn"
           onClick={toggleMute}
-          disabled={!songData}
+          disabled={!currentSong}
         >
           {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
         </button>
@@ -273,7 +310,7 @@ const BottomPlayer = () => {
             value={volume}
             onChange={handleVolumeChange}
             className="volume-slider"
-            disabled={!songData}
+            disabled={!currentSong}
           />
         </div>
         {/* Nút Maximize/Minimize với chức năng toàn màn hình */}
@@ -283,11 +320,12 @@ const BottomPlayer = () => {
       </div>
 
       {/* Audio element ẩn để phát nhạc */}
-      {songData && (
+      {currentSong && (
         <audio
           ref={audioRef}
-          src={songData.audioUrl}
+          src={currentSong.fileUpload}
           onTimeUpdate={handleTimeUpdate}
+          onEnded={handleSongEnded}
         />
       )}
     </div>
