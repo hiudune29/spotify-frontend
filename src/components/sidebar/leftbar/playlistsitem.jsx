@@ -12,7 +12,7 @@ const SidebarPlaylists = ({ playlists, isExpanded }) => {
   const dispatch = useDispatch();
   const { currentPlaylist, currentSong, isPlaying, currentPlayingSongId } =
     useSelector((state) => state.playlists);
-  const userId = 1;
+  const userId = useSelector((state) => state.user.userId);
 
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 

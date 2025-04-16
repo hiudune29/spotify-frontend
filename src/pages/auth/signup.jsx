@@ -1,38 +1,39 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SpotifyIcon from "../../components/ui/spotify-icon";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import EmailStep from "../../components/signup/signup-with-email/emailStep";
 import PasswordStep from "../../components/signup/signup-with-email/passwordStep";
 import InformationStep from "../../components/signup/signup-with-email/informationStep";
 import OTPStep from "../../components/signup/signup-with-email/otpStep";
 import SocialLoginButtons from "../../components/ui/social-button";
 import DividerWithText from "../../components/ui/divider-with-text";
-import SignupProgress from "../../components/signup/process-signup";
+import axios from "axios";
 
 const SignUpPage = () => {
   const [startedSignup, setStartedSignup] = useState(false);
   const [step, setStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Trạng thái dữ liệu người dùng để truyền giữa các bước
   const [userData, setUserData] = useState({
     email: "",
+    userName: "",
+    fullname: "",
     password: "",
-    name: "",
-    birthdate: "",
-    gender: "",
+    dob: "",
+    isPremium: false,
   });
 
-  // Phân tích bước từ URL hash nếu có
   useEffect(() => {
     const hash = location.hash.replace("#", "");
     const stepNumber = parseInt(hash);
 
     if (!startedSignup) {
-      navigate("", { replace: true }); // Trả về trang nhập email
-      setStep(0); // Đảm bảo UI phản ánh đúng
+      navigate("", { replace: true });
+      setStep(0);
       return;
     }
 
@@ -41,7 +42,6 @@ const SignUpPage = () => {
     } else {
       const canAccessStep =
         stepNumber === 1 || completedSteps.includes(stepNumber - 1);
-
       if (canAccessStep) {
         setStep(stepNumber);
       } else {
@@ -54,42 +54,27 @@ const SignUpPage = () => {
 
   const cancelSignup = () => {
     setStartedSignup(false);
-    setCompletedSteps([]); // Reset toàn bộ trạng thái
+    setCompletedSteps([]);
     setUserData({
       email: "",
+      userName: "",
+      fullname: "",
       password: "",
-      name: "",
-      birthdate: "",
-      gender: "",
+      dob: "",
+      isPremium: false,
     });
-    navigate("", { replace: true }); // Quay về trang email
+    setError("");
+    navigate("", { replace: true });
   };
 
-  useEffect(() => {
-    sessionStorage.setItem("signupStep", step);
-    sessionStorage.setItem("userData", JSON.stringify(userData));
-    sessionStorage.setItem("completedSteps", JSON.stringify(completedSteps));
-  }, [step, userData, completedSteps]);
-
-  useEffect(() => {
-    const savedStep = sessionStorage.getItem("signupStep");
-    const savedData = sessionStorage.getItem("userData");
-    const savedCompleted = sessionStorage.getItem("completedSteps");
-
-    if (savedStep) setStep(parseInt(savedStep));
-    if (savedData) setUserData(JSON.parse(savedData));
-    if (savedCompleted) setCompletedSteps(JSON.parse(savedCompleted));
-  }, []);
-
-  // Hàm cập nhật dữ liệu người dùng từ các bước riêng lẻ
   const updateUserData = (data) => {
     setUserData((prev) => ({
       ...prev,
       ...data,
     }));
+    setError("");
   };
 
-  // Bắt đầu quy trình đăng ký sau khi nhập email
   const startSignupProcess = (emailData) => {
     updateUserData(emailData);
     setStartedSignup(true);
@@ -97,10 +82,8 @@ const SignUpPage = () => {
     navigate("#1");
   };
 
-  // Chuyển đến bước tiếp theo
   const nextStep = () => {
     const newStep = step + 1;
-    // Đánh dấu bước hiện tại là đã hoàn thành
     if (!completedSteps.includes(step)) {
       setCompletedSteps((prev) => [...prev, step]);
     }
@@ -108,54 +91,42 @@ const SignUpPage = () => {
     navigate(`#${newStep}`);
   };
 
-  // Quay lại bước trước đó
   const prevStep = () => {
     const newStep = step - 1;
     setStep(newStep);
     navigate(`#${newStep}`);
   };
 
-  // Hàm xử lý gửi dữ liệu cuối cùng
-  const handleSubmit = () => {
-    console.log("Biểu mẫu đã được gửi với dữ liệu:", userData);
-    // Thông thường, dữ liệu sẽ được gửi đến backend tại đây
-    navigate("/success"); // Chuyển hướng sau khi đăng ký thành công
-  };
-
-  // Hiển thị màn hình nhập email (mặc định của trang đăng ký)
+  // Trong SignUpPage.jsx
   if (!startedSignup) {
     return (
-      <div className="flex min-h-screen justify-center bg-black p-4">
-        <div className="w-full max-w-md space-y-8 rounded-lg p-6">
-          <SpotifyIcon />
-
-          <h1 className="text-center text-4xl font-bold text-white">
-            Đăng ký để bắt đầu nghe nhạc
-          </h1>
-
-          {/* Biểu mẫu nhập email */}
-          <EmailStep
-            nextStep={startSignupProcess}
-            userData={userData}
-            updateUserData={updateUserData}
-          />
-
-          <DividerWithText text="hoặc" />
-          {/* Các nút đăng nhập bằng mạng xã hội */}
-          <SocialLoginButtons signUp={true} />
-
-          <DividerWithText />
-          {/* Liên kết đăng nhập */}
-          <div className="text-center mt-6">
-            <p className="text-sm text-gray-400">
-              Đã có tài khoản?{" "}
-              <a href="/login" className="text-white hover:underline">
-                Đăng nhập tại đây
-              </a>
-            </p>
+      <GoogleOAuthProvider clientId="474604047510-k2b2ejrdjnvj96p7b565fh80i3sm9o8e.apps.googleusercontent.com">
+        <div className="flex min-h-screen justify-center bg-black p-4">
+          <div className="w-full max-w-md space-y-8 rounded-lg p-6">
+            <SpotifyIcon />
+            <h1 className="text-center text-4xl font-bold text-white">
+              Đăng ký để bắt đầu nghe nhạc
+            </h1>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <EmailStep
+              nextStep={startSignupProcess}
+              userData={userData}
+              updateUserData={updateUserData}
+            />
+            <DividerWithText text="hoặc" />
+            <SocialLoginButtons signUp={true} setError={setError} />
+            <DividerWithText />
+            <div className="text-center mt-6">
+              <p className="text-sm text-gray-400">
+                Đã có tài khoản?{" "}
+                <a href="/login" className="text-white hover:underline">
+                  Đăng nhập tại đây
+                </a>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </GoogleOAuthProvider>
     );
   }
 
@@ -163,12 +134,9 @@ const SignUpPage = () => {
     <div className="flex min-h-screen justify-center bg-black p-4">
       <div className="w-full max-w-md space-y-8 rounded-lg p-6">
         <SpotifyIcon />
-
         <h1 className="text-center text-4xl font-bold text-white">
           Đăng ký tài khoản Spotify
         </h1>
-
-        {/* Chỉ báo bước đăng ký với 3 bước */}
         <div className="flex justify-center mb-6">
           {[1, 2, 3].map((num) => (
             <div key={num} className="flex items-center">
@@ -189,8 +157,6 @@ const SignUpPage = () => {
             </div>
           ))}
         </div>
-        {/* <SignupProgress step={step} /> */}
-
         <div className="bg-[#121212] p-3 rounded-md border border-gray-700 mb-4">
           <div className="flex justify-between items-center">
             <div className="text-gray-400 text-sm">
@@ -207,7 +173,7 @@ const SignUpPage = () => {
             </button>
           </div>
         </div>
-        {/* Nội dung các bước */}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
         <div className="mt-4">
           {step === 1 && (
             <PasswordStep
@@ -226,10 +192,9 @@ const SignUpPage = () => {
           )}
           {step === 3 && (
             <OTPStep
-              prevStep={prevStep}
               userData={userData}
-              updateUserData={updateUserData}
-              onSubmit={handleSubmit}
+              setError={setError}
+              navigate={navigate}
             />
           )}
         </div>

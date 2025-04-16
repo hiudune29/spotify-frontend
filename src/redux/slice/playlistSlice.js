@@ -1,14 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-//New
+const token = localStorage.getItem("token");
+// Create
 export const createPlaylist = createAsyncThunk(
   "playlists/create",
   async (playlistData, thunkAPI) => {
     try {
       const response = await axios.post(
         "http://localhost:8080/api/playlists/create",
-        playlistData
+        playlistData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data.result;
     } catch (error) {
@@ -17,15 +23,55 @@ export const createPlaylist = createAsyncThunk(
   }
 );
 
-//update
+// Update
+export const updatePlaylist = createAsyncThunk(
+  "playlists/update",
+  async ({ id, playlistData, avatarFile }, thunkAPI) => {
+    try {
+      const formData = new FormData();
 
-//delete
+      formData.append(
+        "playlist",
+        new Blob([JSON.stringify(playlistData)], {
+          type: "application/json",
+        })
+      );
+
+      if (avatarFile) {
+        formData.append("avatar", avatarFile);
+      }
+
+      const response = await axios.put(
+        `http://localhost:8080/api/playlists/update/${id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return response.data.result;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+// Delete
 export const deletePlaylist = createAsyncThunk(
   "playlists/delete",
   async (id, thunkAPI) => {
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/playlists/delete/${id}`
+        `http://localhost:8080/api/playlists/delete/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data.result;
     } catch (error) {
@@ -34,12 +80,18 @@ export const deletePlaylist = createAsyncThunk(
   }
 );
 
+// Fetch playlists by userId
 export const fetchPlaylistsByUserId = createAsyncThunk(
   "playlists/fetchByUserId",
   async (userId, thunkAPI) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/playlists/user/${userId}`
+        `http://localhost:8080/api/playlists/user/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data.result;
     } catch (error) {
@@ -48,12 +100,18 @@ export const fetchPlaylistsByUserId = createAsyncThunk(
   }
 );
 
+// Fetch all songs
 export const fetchSongs = createAsyncThunk(
   "playlists/fetchSongs",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/songs/page?pageSize=20`
+        `http://localhost:8080/api/songs/page?pageSize=20`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data.result.content || [];
     } catch (error) {
@@ -62,22 +120,25 @@ export const fetchSongs = createAsyncThunk(
   }
 );
 
+// Fetch songs of a playlist
 export const fetchPlaylistSongs = createAsyncThunk(
   "playlist/fetchPlaylistSongs",
   async (playlistId, thunkAPI) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/playlists/song/${playlistId}`
+        `http://localhost:8080/api/playlists/song/${playlistId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      // Trả về toàn bộ response.data.result vì API trả về cấu trúc
-      // { playlist: {...}, songs: [...] }
       return response.data.result;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
   }
 );
-
 const initialState = {
   // Các state đang được sử dụng:
   items: [], // Dùng cho danh sách playlist trong sidebar

@@ -11,7 +11,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
 
   // Fake userId hoặc lấy từ Redux/Auth sau
-  const userId = 1;
+  const userId = useSelector((state) => state.user.userId);
 
   useEffect(() => {
     dispatch(fetchPlaylistsByUserId(userId));

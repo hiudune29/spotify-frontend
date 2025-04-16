@@ -2,11 +2,12 @@
 import React, { useState } from "react";
 import { Plus, ArrowRight } from "lucide-react";
 import { VscLibrary } from "react-icons/vsc";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { createPlaylist } from "../../../redux/slice/playlistSlice";
 import defaultCover from "../../../assets/default.png"; // Add this import
 
 const SidebarHeader = ({ onToggle, isExpanded }) => {
+  const userId = useSelector((state) => state.user.userId);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,7 +20,7 @@ const SidebarHeader = ({ onToggle, isExpanded }) => {
         description: "Playlist của tôi",
         coverImage: defaultCover, // Using imported default cover image
         isPlaylistLiked: false,
-        userId: 1, // Should be dynamic based on logged in user
+        userId: userId, // Should be dynamic based on logged in user
       };
 
       await dispatch(createPlaylist(newPlaylistData)).unwrap();
