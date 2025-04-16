@@ -1,5 +1,11 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux"; // Thêm useSelector
+import {
+  togglePlaylistContent,
+  clearSelectedSong,
+  resetPlaylistState,
+} from "../../redux/slice/playlistSlice";
 import { Home, Search } from "lucide-react";
 import "./TopBar.css";
 import avatar from "../../assets/avatar.png";
@@ -7,10 +13,11 @@ import avatar from "../../assets/avatar.png";
 // Left Icon Group Component
 const LeftIconGroup = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSpotifyClick = () => {
     navigate("/");
-    window.location.reload();
+    dispatch(togglePlaylistContent(false));
   };
 
   return (
@@ -35,11 +42,17 @@ const CenterSection = () => {
   const [searchQuery, setSearchQuery] = useState("What do you want to play?");
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Lấy trạng thái xem có đang xem bài hát đơn lẻ hay không
+  const { selectedSong } = useSelector((state) => state.playlists);
 
   const goToHome = () => {
     if (location.pathname !== "/") {
       navigate("/");
     }
+    // Reset toàn bộ state
+    dispatch(resetPlaylistState());
   };
 
   const handleSearchChange = (e) => {

@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import BottomPlayer from "./BottomPlayer";
 import PlaylistContent from "../playlist/playlistcontent";
 import Rightbar from "../sidebar/rightbar/rightbar";
@@ -8,6 +9,20 @@ import UserProfile from "../../pages/UserProfile/UserProfile";
 import TopBar from "./TopBar";
 
 const Layout = () => {
+  const { showPlaylistContent, selectedSong, currentPlaylist } = useSelector(
+    (state) => state.playlists
+  );
+
+  const renderContent = () => {
+    if (selectedSong) {
+      return <PlaylistContent type="song" singleSong={selectedSong} />;
+    }
+    if (showPlaylistContent && currentPlaylist) {
+      return <PlaylistContent />;
+    }
+    return <ContentPlaylist />;
+  };
+
   return (
     <div className="flex flex-col h-screen bg-black text-white">
       {/* Top Bar */}
@@ -21,13 +36,10 @@ const Layout = () => {
         <Sidebar />
 
         {/* Playlist Content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* <ContentPlaylist /> */}
-          <PlaylistContent />
-        </div>
+        <div className="flex-1 overflow-y-auto">{renderContent()}</div>
 
         {/* Rightbar */}
-        <Rightbar />
+        {/* <Rightbar /> */}
       </div>
 
       {/* Bottom Player */}

@@ -1,65 +1,41 @@
-// Sidebar.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import SidebarHeader from "./sidebarheader";
 import SidebarTabs from "./sidebartab";
 import SidebarSearchFilter from "./sidebarfilter";
 import SidebarPlaylists from "./playlistsitem";
+import { fetchPlaylistsByUserId } from "../../../redux/slice/playlistSlice";
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const dispatch = useDispatch();
+
+  // Fake userId hoặc lấy từ Redux/Auth sau
+  const userId = 1;
+
+  useEffect(() => {
+    dispatch(fetchPlaylistsByUserId(userId));
+  }, [dispatch, userId]);
+
+  const {
+    items = [],
+    loading,
+    error,
+  } = useSelector((state) => state.playlists || {});
 
   const toggleSidebar = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const playlists = [
-    {
-      id: "1",
-      title: "Bài hát đã thích",
-      type: "Danh sách phát",
-      creator: "2 bài hát",
-      isLiked: true,
-      coverUrl: "/placeholder.svg?height=60&width=60",
-      addedDate: "28 thg10,2021",
-      lastPlayed: "23 phút trước",
-    },
-    {
-      id: "2",
-      title: "Rap On Trap",
-      type: "Danh sách phát",
-      creator: "Xavi Lê",
-      coverUrl: "/placeholder.svg",
-      addedDate: "",
-      lastPlayed: "5 phút trước",
-    },
-    {
-      id: "3",
-      title: "Minecraft: Soothing Synchronization",
-      type: "EP",
-      creator: "Minecraft",
-      coverUrl: "/placeholder.svg",
-      addedDate: "4 thg1,2024",
-      lastPlayed: "2 ngày trước",
-    },
-    {
-      id: "4",
-      title: "Synthwave - beats to chill relax",
-      type: "Danh sách phát",
-      creator: "Lofi Girl",
-      coverUrl: "/placeholder.svg",
-      addedDate: "29 thg10,2021",
-      lastPlayed: "1 giờ trước",
-    },
-    {
-      id: "5",
-      title: "My Playlist #2",
-      type: "Danh sách phát",
-      creator: "Xavi Lê",
-      coverUrl: "/placeholder.svg",
-      addedDate: "29 thg10,2021",
-      lastPlayed: "30 phút trước",
-    },
-  ];
+  const mappedPlaylists = items.map((playlist) => ({
+    id: playlist.playlistId,
+    title: playlist.name,
+    type: "Danh sách phát",
+    creator: playlist.user.fullName,
+    coverUrl: playlist.coverImage || "/placeholder.svg",
+    addedDate: playlist.createAt?.slice(0, 10) || "",
+    lastPlayed: "", // nếu muốn, có thể dùng thư viện date-fns để xử lý thời gian
+  }));
 
   return (
     <div
@@ -81,7 +57,13 @@ const Sidebar = () => {
         </>
       )}
 
-      <SidebarPlaylists playlists={playlists} isExpanded={isExpanded} />
+      {loading ? (
+        <p className="text-center py-4">Đang tải danh sách...</p>
+      ) : error ? (
+        <p className="text-center py-4 text-red-400">Lỗi: {error}</p>
+      ) : (
+        <SidebarPlaylists playlists={mappedPlaylists} isExpanded={isExpanded} />
+      )}
     </div>
   );
 };
