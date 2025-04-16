@@ -43,17 +43,18 @@ const AlbumUpdate = () => {
     if (albumDetail) {
       form.setFieldsValue({
         albumId: albumDetail.albumId,
-        description: albumDetail.description,
+        title: albumDetail.title,
         releaseDate: dayjs(albumDetail.releaseDate),
         artist: albumDetail.artistId,
         type: albumDetail.type,
         image: albumDetail.coverImage
           ? [
               {
-                uid: "-1",
-                name: "Ảnh hiện tại",
-                status: "done",
-                url: albumDetail.coverImage,
+                uid: "-1", // uid tùy chỉnh, không trùng với bất kỳ file nào mới được upload
+                name: "Ảnh hiện tại", // Tên ảnh có thể tùy chỉnh
+                status: "done", // Trạng thái ảnh đã tải xong
+                url: albumDetail.coverImage, // URL của ảnh từ AWS
+                thumbUrl: albumDetail.coverImage, // Thumbnail ảnh (có thể là URL giống URL chính)
               },
             ]
           : [],
@@ -78,12 +79,11 @@ const AlbumUpdate = () => {
   const onFinish = (values) => {
     const payload = {
       albumId: values.albumId,
-      title: values.name,
-      description: values.description,
+      title: values.title,
       releaseDate: values.releaseDate.format("YYYY-MM-DD"),
       artistId: values.artist,
       type: values.type,
-      image: values.image,
+      image: values.image || [],
     };
 
     dispatch(updateAlbum(payload))
@@ -112,15 +112,11 @@ const AlbumUpdate = () => {
         style={{ maxWidth: 1000, width: "100%" }}
         onFinish={onFinish}
       >
-        {/* albumId không chỉnh sửa */}
-        <Form.Item label="Album ID" name="albumId">
-          <Input disabled />
-        </Form.Item>
-
         {/* Select tên album (searchable + ảnh) */}
         <Form.Item
-          label="Tên album"
-          name="name"
+          label="Tìm Album"
+          name="searchAlbum"
+          required={false}
           rules={[{ required: true, message: "Chọn album để cập nhật" }]}
         >
           <Select
@@ -132,10 +128,24 @@ const AlbumUpdate = () => {
           />
         </Form.Item>
 
+        {/* albumId không chỉnh sửa */}
+        <Form.Item label="Album ID" name="albumId">
+          <Input disabled />
+        </Form.Item>
+        {/* albumId không chỉnh sửa */}
+        <Form.Item
+          label="Tên Album"
+          name="title"
+          rules={[{ required: true, message: "Vui lòng nhập tên" }]}
+          required={false}
+        >
+          <Input />
+        </Form.Item>
         {/* Ngày phát hành */}
         <Form.Item
           label="Ngày phát hành"
           name="releaseDate"
+          required={false}
           rules={[{ required: true, message: "Vui lòng chọn ngày phát hành" }]}
         >
           <DatePicker
@@ -146,18 +156,6 @@ const AlbumUpdate = () => {
           />
         </Form.Item>
 
-        {/* Mô tả */}
-        <Form.Item
-          label="Mô tả"
-          name="description"
-          rules={[
-            { required: true, message: "Vui lòng nhập mô tả" },
-            { min: 10, message: "Ít nhất 10 ký tự" },
-          ]}
-        >
-          <TextArea rows={4} />
-        </Form.Item>
-
         {/* Ảnh */}
         <Form.Item
           label="Ảnh đại diện"
@@ -165,9 +163,9 @@ const AlbumUpdate = () => {
           valuePropName="fileList"
           getValueFromEvent={normFile}
           rules={[{ required: true, message: "Vui lòng chọn ảnh" }]}
+          required={false}
         >
           <Upload
-            name="image"
             listType="picture"
             beforeUpload={() => false}
             accept="image/*"
@@ -183,6 +181,7 @@ const AlbumUpdate = () => {
           label="Nghệ sĩ"
           name="artist"
           rules={[{ required: true, message: "Chọn nghệ sĩ" }]}
+          required={false}
         >
           <Select
             placeholder="Chọn nghệ sĩ"
@@ -197,6 +196,7 @@ const AlbumUpdate = () => {
         <Form.Item
           label="Thể loại"
           name="type"
+          required={false}
           rules={[{ required: true, message: "Chọn thể loại" }]}
         >
           <Select

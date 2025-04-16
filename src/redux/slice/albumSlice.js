@@ -73,7 +73,6 @@ export const createAlbum = createAsyncThunk(
           [
             JSON.stringify({
               title: albumData.title,
-              description: albumData.description,
               releaseDate: albumData.releaseDate,
               artistId: albumData.artistId,
               type: albumData.type,
@@ -82,6 +81,7 @@ export const createAlbum = createAsyncThunk(
           { type: "application/json" }
         )
       );
+      // Kiểm tra xem albumData.image có tồn tại và image[0] có tồn tại originFileObj không
       formData.append("coverImage", albumData.image[0].originFileObj);
 
       const res = await axios.post(
@@ -109,8 +109,8 @@ export const updateAlbum = createAsyncThunk(
         new Blob(
           [
             JSON.stringify({
+              albumId: albumData.albumId,
               title: albumData.title,
-              description: albumData.description,
               releaseDate: albumData.releaseDate,
               artistId: albumData.artistId,
               type: albumData.type,
@@ -121,7 +121,7 @@ export const updateAlbum = createAsyncThunk(
       );
       formData.append("coverImage", albumData.image[0].originFileObj);
 
-      const res = await axios.post(
+      const res = await axios.put(
         "http://localhost:8080/api/album/update",
         formData,
         {

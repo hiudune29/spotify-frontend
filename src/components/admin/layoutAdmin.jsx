@@ -85,7 +85,7 @@ const LayoutAdmin = () => {
         <Content style={{ margin: "10px 16px" }}>
           <div
             style={{
-              padding: 24,
+              padding: 20,
               minHeight: 360,
               background: colorBgContainer,
               borderRadius: borderRadiusLG,

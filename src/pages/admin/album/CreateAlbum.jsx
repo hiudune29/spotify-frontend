@@ -30,7 +30,6 @@ const CreateAlbum = () => {
   const onFinish = (values) => {
     const albumData = {
       title: values.name,
-      description: values.description,
       releaseDate: values.releaseDate.format("YYYY-MM-DD"),
       artistId: values.artist,
       type: values.type,
@@ -75,6 +74,7 @@ const CreateAlbum = () => {
             label="Tên"
             name="name"
             rules={[{ required: true, message: "Vui lòng nhập tên" }]}
+            required={false}
           >
             <Input placeholder="Nhập tên..." />
           </Form.Item>
@@ -82,6 +82,7 @@ const CreateAlbum = () => {
           {/* DatePicker */}
           <Form.Item
             label="Ngày phát hành"
+            required={false}
             name="releaseDate"
             rules={[
               { required: true, message: "Vui lòng chọn ngày phát hành" },
@@ -96,24 +97,13 @@ const CreateAlbum = () => {
             />
           </Form.Item>
 
-          {/* Description */}
-          <Form.Item
-            label="Mô tả"
-            name="description"
-            rules={[
-              { required: true, message: "Vui lòng nhập mô tả" },
-              { min: 10, message: "Mô tả phải ít nhất 10 ký tự" },
-            ]}
-          >
-            <TextArea rows={4} placeholder="Nhập mô tả chi tiết..." />
-          </Form.Item>
-
           {/* Upload ảnh */}
           <Form.Item
             label="Ảnh đại diện"
             name="image"
             valuePropName="fileList"
             getValueFromEvent={normFile}
+            required={false}
             rules={[{ required: true, message: "Vui lòng chọn ảnh" }]}
           >
             <Upload
@@ -132,6 +122,7 @@ const CreateAlbum = () => {
           <Form.Item
             label="Nghệ sĩ"
             name="artist"
+            required={false}
             rules={[{ required: true, message: "Vui lòng chọn 1 nghệ sĩ" }]}
           >
             <Select
@@ -147,6 +138,7 @@ const CreateAlbum = () => {
           <Form.Item
             label="Thể loại"
             name="type"
+            required={false}
             rules={[{ required: true, message: "Vui lòng chọn thể loại" }]}
           >
             <Select

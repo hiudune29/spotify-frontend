@@ -51,7 +51,7 @@ const Artist = () => {
         <img
           src={url}
           alt="Cover"
-          style={{ width: 80, height: 80, objectFit: "cover" }}
+          style={{ width: 40, height: 40, objectFit: "cover" }}
         />
       ),
     },
