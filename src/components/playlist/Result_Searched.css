@@ -1,0 +1,299 @@
+.result-searched {
+  padding: 20px;
+  background-color: #121212;
+  color: #fff;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+/* Songs Section */
+.songs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.song-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #181818;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.song-item:hover {
+  background-color: #282828;
+}
+
+.song-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.song-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.song-artist {
+  font-size: 14px;
+  color: #b3b3b3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.explicit-label {
+  font-size: 12px;
+  color: #b3b3b3;
+  border: 1px solid #b3b3b3;
+  border-radius: 2px;
+  padding: 0 4px;
+}
+
+.song-duration {
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.song-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-button {
+  background: none;
+  border: 1px solid #b3b3b3;
+  color: #b3b3b3;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.add-button:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+/* Artists, Albums, Playlists Sections */
+.artists-list,
+.albums-list,
+.playlists-list {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-behavior: smooth;
+}
+
+/* Ẩn thanh cuộn trên các trình duyệt */
+.artists-list::-webkit-scrollbar,
+.albums-list::-webkit-scrollbar,
+.playlists-list::-webkit-scrollbar {
+  display: none;
+}
+
+.artists-list,
+.albums-list,
+.playlists-list {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Đảm bảo giao diện card đồng nhất */
+.artists-list .artist-card,
+.albums-list .album-card,
+.playlists-list .playlist-card {
+  width: 200px;
+  background-color: #181818;
+  border-radius: 8px;
+  padding: 8px;
+  transition: background-color 0.2s;
+}
+
+.artists-list .artist-card:hover,
+.albums-list .album-card:hover,
+.playlists-list .playlist-card:hover {
+  background-color: #282828;
+}
+
+.artists-list .artist-card img,
+.albums-list .album-card img,
+.playlists-list .playlist-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.artists-list .artist-card h3,
+.albums-list .album-card h3,
+.playlists-list .playlist-card h3 {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.artists-list .artist-card p,
+.albums-list .album-card p,
+.playlists-list .playlist-card p {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #b3b3b3;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nút play cho AlbumCard và PlaylistCard */
+.album-card .play-button,
+.playlist-card .play-button {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background-color: #1ed760;
+  color: #000;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.album-card:hover .play-button,
+.playlist-card:hover .play-button {
+  opacity: 1;
+}
+
+/* CSS cho AddSongPlaylist Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #282828;
+  border-radius: 8px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+.playlist-search {
+  margin-bottom: 16px;
+}
+
+.playlist-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #121212;
+  border: 1px solid #b3b3b3;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.playlist-search-input::placeholder {
+  color: #b3b3b3;
+}
+
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.playlist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #181818;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.playlist-item:hover {
+  background-color: #333;
+}
+
+.playlist-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.playlist-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.playlist-artist {
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.playlist-duration {
+  font-size: 14px;
+  color: #b3b3b3;
+}

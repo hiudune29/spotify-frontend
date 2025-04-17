@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom"; // Thêm useNavigate
+import { useNavigate } from "react-router-dom";
 import { fetchUserInfo, clearUser } from "../../redux/slice/userSlice";
 import BottomPlayer from "./BottomPlayer";
 import PlaylistContent from "../playlist/playlistcontent";
-
 import Sidebar from "../sidebar/leftbar/sidebar";
 import ContentPlaylist from "../listContent/contentPlaylist";
 import UserProfile from "../../pages/UserProfile/UserProfile";
 import TopBar from "./TopBar";
+import Result_Searched from "../playlist/Result_Searched";
 
 const Layout = () => {
   const dispatch = useDispatch();
@@ -18,7 +18,8 @@ const Layout = () => {
   );
   const { showPlaylistContent, selectedSong, currentPlaylist } = useSelector(
     (state) => state.playlists
-  ); // <-- Chuyển lên trên
+  );
+  const { searchQuery, showUserProfile } = useSelector((state) => state.search);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -51,6 +52,15 @@ const Layout = () => {
   }
 
   const renderContent = () => {
+    // Ưu tiên hiển thị Result_Searched nếu có searchQuery
+    if (searchQuery) {
+      return <Result_Searched />;
+    }
+    // Sau đó mới kiểm tra showUserProfile
+    if (showUserProfile) {
+      return <UserProfile />;
+    }
+    // Logic hiện tại
     if (selectedSong) {
       return <PlaylistContent type="song" singleSong={selectedSong} />;
     }

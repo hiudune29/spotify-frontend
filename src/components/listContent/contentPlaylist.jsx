@@ -58,7 +58,7 @@ const MusicSession = () => {
   const { songs, loading, selectedSong, currentPlaylist, showPlaylistContent } =
     useSelector((state) => state.playlists);
   const recommendedRef = useRef(null);
-
+  console.log("songs", songs);
   useEffect(() => {
     dispatch(fetchSongs());
   }, [dispatch]);

@@ -142,6 +142,7 @@ export const fetchPlaylistSongs = createAsyncThunk(
 const initialState = {
   // Các state đang được sử dụng:
   items: [], // Dùng cho danh sách playlist trong sidebar
+  songs: [], // Dùng cho danh sách bài hát
   currentSong: null, // Bài hát đang phát
   currentPlaylist: null, // Playlist đang được hiển thị/phát
   currentSongIndex: 0, // Vị trí bài hát trong playlist
