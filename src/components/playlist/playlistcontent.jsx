@@ -8,8 +8,9 @@ import { setCurrentSong, togglePlay } from "../../redux/slice/playlistSlice"; //
 
 const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
   const dispatch = useDispatch(); // Add dispatch
-  const { currentPlaylist, loading, currentPlayingSongId, isPlaying } =
-    useSelector((state) => state.playlists);
+  const { currentPlaylist, currentPlayingSongId, isPlaying } = useSelector(
+    (state) => state.playlists
+  );
 
   const handlePlay = () => {
     if (type === "song" && singleSong) {
@@ -89,7 +90,7 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
     );
   };
 
-  if (loading) return <div>Loading...</div>;
+  // if (loading) return <div>Loading...</div>;
   if (!currentPlaylist && type === "playlist")
     return <div>No playlist data available</div>;
 

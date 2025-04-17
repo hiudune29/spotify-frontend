@@ -25,7 +25,7 @@ const CardSong = ({ song, onSongClick }) => {
     >
       <div className="relative">
         <img
-          src={song.img}
+          src={song.img || "https://via.placeholder.com/150"}
           alt={song.songName}
           className="w-[180px] h-[180px] object-cover rounded-md"
         />

@@ -46,7 +46,6 @@ export const updatePlaylist = createAsyncThunk(
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -141,7 +140,8 @@ export const fetchPlaylistSongs = createAsyncThunk(
 );
 const initialState = {
   // Các state đang được sử dụng:
-  items: [], // Dùng cho danh sách playlist trong sidebar
+  items: [],
+  songs: [], // Dùng cho danh sách playlist trong sidebar
   currentSong: null, // Bài hát đang phát
   currentPlaylist: null, // Playlist đang được hiển thị/phát
   currentSongIndex: 0, // Vị trí bài hát trong playlist
@@ -257,7 +257,6 @@ const playlistSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchPlaylistSongs.fulfilled, (state, action) => {
-        // Cập nhật trực tiếp currentPlaylist với dữ liệu từ API
         state.currentPlaylist = action.payload;
         state.loading = false;
       })
@@ -294,6 +293,26 @@ const playlistSlice = createSlice({
         state.loading = false;
       })
       .addCase(deletePlaylist.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updatePlaylist.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updatePlaylist.fulfilled, (state, action) => {
+        const updated = action.payload;
+        state.items = state.items.map((pl) =>
+          pl.playlistId === updated.playlistId ? updated : pl
+        );
+        if (
+          state.currentPlaylist?.playlist?.playlistId === updated.playlistId
+        ) {
+          state.currentPlaylist.playlist = updated;
+        }
+        state.loading = false;
+      })
+      .addCase(updatePlaylist.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
