@@ -26,7 +26,7 @@ import {
 
 const { TextArea } = Input;
 
-const AlbumUpdate = () => {
+const UpdateAlbum = () => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
@@ -90,6 +90,7 @@ const AlbumUpdate = () => {
       .unwrap()
       .then(() => {
         message.success("Cập nhật album thành công!");
+        form.resetFields();
       })
       .catch((err) => {
         console.error(err);
@@ -150,6 +151,7 @@ const AlbumUpdate = () => {
         >
           <DatePicker
             style={{ width: "100%" }}
+            placeholder="Chọn ngày phát hành"
             disabledDate={(current) =>
               current && current > dayjs().endOf("day")
             }
@@ -220,4 +222,4 @@ const AlbumUpdate = () => {
   );
 };
 
-export default AlbumUpdate;
+export default UpdateAlbum;

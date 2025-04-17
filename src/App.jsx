@@ -16,7 +16,8 @@ import Album from "./pages/admin/album/Album";
 import Artist from "./pages/admin/artist/Artist";
 import CreateAlbum from "./pages/admin/album/CreateAlbum";
 import UpdateAlbum from "./pages/admin/album/UpdateAlbum";
-
+import CreateArtist from "./pages/admin/artist/CreateArtist";
+import UpdateArtist from "./pages/admin/artist/UpdateArtist";
 // Component bảo vệ route cho admin
 const ProtectedAdminRoute = ({ children }) => {
   const { role } = useSelector((state) => state.user);
@@ -42,18 +43,16 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedAdminRoute>
-              <AdminLayout />
-            </ProtectedAdminRoute>
+            // <ProtectedAdminRoute>
+            <AdminLayout />
+            // </ProtectedAdminRoute>
           }
         >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="song" element={<Song />} />
-          <Route path="artist" element={<Artist />}>
-            {/* <Route path="create" element={<div>Create Artist</div>} />
-            <Route path="update" element={<div>Update Artist</div>} /> */}
-          </Route>
-
+          <Route path="artist" element={<Artist />} />
+          <Route path="artist/create" element={<CreateArtist />} />
+          <Route path="artist/update" element={<UpdateArtist />} />
           <Route path="album" element={<Album />} />
           <Route path="album/create" element={<CreateAlbum />} />
           <Route path="album/update" element={<UpdateAlbum />} />

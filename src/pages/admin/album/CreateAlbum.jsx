@@ -62,6 +62,7 @@ const CreateAlbum = () => {
     <>
       <div className="p-4 flex justify-center items-center">
         <Form
+          form={form}
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 15 }}
           layout="horizontal"
@@ -145,7 +146,7 @@ const CreateAlbum = () => {
               placeholder="Chọn thể loại"
               optionFilterProp="label"
               options={[
-                { label: "Album", value: "ALBUM" },
+                { label: "Album", value: "Album" },
                 { label: "EP", value: "EP" },
               ]}
               allowClear

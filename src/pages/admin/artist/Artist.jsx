@@ -45,8 +45,8 @@ const Artist = () => {
     },
     {
       title: "Hình ảnh",
-      dataIndex: "coverImage",
-      key: "coverImage",
+      dataIndex: "img",
+      key: "img",
       render: (url) => (
         <img
           src={url}
@@ -117,7 +117,7 @@ const Artist = () => {
     },
   ];
 
-  const handleChange = (pagination, filters, sorter) => {
+  const handleChange = (pagination, sorter) => {
     setSortedInfo(sorter);
     dispatch(
       fetchArtists({

@@ -8,7 +8,7 @@ import { Table, Button, Space } from "antd";
 import AdminTable from "../../../components/admin/ui/Table"; // Giả sử bạn có component này
 const Album = () => {
   const dispatch = useDispatch();
-  const [filteredInfo, setFilteredInfo] = useState({});
+  // const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
 
   useEffect(() => {
@@ -37,14 +37,11 @@ const Album = () => {
     },
     {
       title: "Nghệ sĩ",
-      dataIndex: "artistId",
-      key: "artistId",
-      filters: [
-        { text: "Artist 1", value: "Artist 1" },
-        { text: "Artist 2", value: "Artist 2" },
-      ],
-      filteredValue: filteredInfo.artistId || null,
-      onFilter: (value, record) => record.artistId.includes(value),
+      dataIndex: "artist",
+      key: "artist",
+      render: (artist) => {
+        return artist?.name;
+      },
     },
     {
       title: "Tiêu đề",
@@ -97,8 +94,7 @@ const Album = () => {
     },
   ];
 
-  const handleChange = (pagination, filters, sorter) => {
-    setFilteredInfo(filters);
+  const handleChange = (pagination, filter, sorter) => {
     setSortedInfo(sorter);
     dispatch(
       fetchAlbums({
@@ -108,28 +104,14 @@ const Album = () => {
     );
   };
 
-  const clearFilters = () => {
-    setFilteredInfo({});
-  };
-
   const clearAll = () => {
-    setFilteredInfo({});
     setSortedInfo({});
-  };
-
-  const setAgeSort = () => {
-    setSortedInfo({
-      order: "descend",
-      columnKey: "age",
-    });
   };
 
   return (
     <div className="p-4">
       <Space style={{ marginBottom: 16 }}>
-        <Button onClick={setAgeSort}>Sort by age</Button>
-        <Button onClick={clearFilters}>Clear filters</Button>
-        <Button onClick={clearAll}>Clear filters and sorters</Button>
+        <Button onClick={clearAll}>Clear</Button>
       </Space>
       <AdminTable
         columns={columns}

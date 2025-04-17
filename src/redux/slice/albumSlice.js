@@ -176,14 +176,6 @@ const albumSlice = createSlice({
             state.items[index] = updatedAlbum;
           }
         }
-      })
-      .addCase(createAlbum.fulfilled, (state, action) => {
-        const newAlbum = action.payload;
-        if (Array.isArray(state.items)) {
-          state.items.push(newAlbum);
-        } else if (state.items.content) {
-          state.items.content.push(newAlbum);
-        }
       });
   },
 });
