@@ -8,7 +8,6 @@ import InformationStep from "../../components/signup/signup-with-email/informati
 import OTPStep from "../../components/signup/signup-with-email/otpStep";
 import SocialLoginButtons from "../../components/ui/social-button";
 import DividerWithText from "../../components/ui/divider-with-text";
-import axios from "axios";
 
 const SignUpPage = () => {
   const [startedSignup, setStartedSignup] = useState(false);

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAlbums, toggleAlbumStatus } from "../../redux/slice/albumSlice"; // Giả sử bạn có action này
+import {
+  fetchAlbums,
+  toggleAlbumStatus,
+} from "../../../redux/slice/albumSlice"; // Giả sử bạn có action này
 import { Table, Button, Space } from "antd";
-
+import AdminTable from "../../../components/admin/ui/Table"; // Giả sử bạn có component này
 const Album = () => {
   const dispatch = useDispatch();
-  const [filteredInfo, setFilteredInfo] = useState({});
+  // const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
 
   useEffect(() => {
@@ -34,14 +37,11 @@ const Album = () => {
     },
     {
       title: "Nghệ sĩ",
-      dataIndex: "artistId",
-      key: "artistId",
-      filters: [
-        { text: "Artist 1", value: "Artist 1" },
-        { text: "Artist 2", value: "Artist 2" },
-      ],
-      filteredValue: filteredInfo.artistId || null,
-      onFilter: (value, record) => record.artistId.includes(value),
+      dataIndex: "artist",
+      key: "artist",
+      render: (artist) => {
+        return artist?.name;
+      },
     },
     {
       title: "Tiêu đề",
@@ -67,7 +67,7 @@ const Album = () => {
         <img
           src={url}
           alt="Cover"
-          style={{ width: 80, height: 80, objectFit: "cover" }}
+          style={{ width: 40, height: 40, objectFit: "cover" }}
         />
       ),
     },
@@ -94,8 +94,7 @@ const Album = () => {
     },
   ];
 
-  const handleChange = (pagination, filters, sorter) => {
-    setFilteredInfo(filters);
+  const handleChange = (pagination, filter, sorter) => {
     setSortedInfo(sorter);
     dispatch(
       fetchAlbums({
@@ -105,40 +104,23 @@ const Album = () => {
     );
   };
 
-  const clearFilters = () => {
-    setFilteredInfo({});
-  };
-
   const clearAll = () => {
-    setFilteredInfo({});
     setSortedInfo({});
-  };
-
-  const setAgeSort = () => {
-    setSortedInfo({
-      order: "descend",
-      columnKey: "age",
-    });
   };
 
   return (
     <div className="p-4">
       <Space style={{ marginBottom: 16 }}>
-        <Button onClick={setAgeSort}>Sort by age</Button>
-        <Button onClick={clearFilters}>Clear filters</Button>
-        <Button onClick={clearAll}>Clear filters and sorters</Button>
+        <Button onClick={clearAll}>Clear</Button>
       </Space>
-      <Table
+      <AdminTable
         columns={columns}
         dataSource={albums}
         rowKey="albumId"
-        pagination={{
-          current: pageNo + 1,
-          pageSize: pageSize,
-          total: totalElements,
-          showSizeChanger: true,
-        }}
-        onChange={handleChange}
+        handleChange={handleChange}
+        pageNo={pageNo}
+        pageSize={pageSize}
+        totalElements={totalElements}
       />
     </div>
   );

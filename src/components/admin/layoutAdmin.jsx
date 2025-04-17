@@ -18,15 +18,15 @@ function getItem(label, key, icon, children) {
 const items = [
   getItem("Tổng quan", "dashboard", <PieChartOutlined />),
   getItem("Bài hát", "song", <PieChartOutlined />),
-  getItem("Nghệ sĩ", "", <DesktopOutlined />, [
+  getItem("Nghệ sĩ", "artists", <DesktopOutlined />, [
     getItem("Danh sách nghệ sĩ", "artist"),
-    getItem("Thêm nghệ sĩ", "add-artist"),
-    getItem("Cập nhật nghệ sĩ", "update-artist"),
+    getItem("Thêm nghệ sĩ", "artist/create"),
+    getItem("Cập nhật nghệ sĩ", "artist/update"),
   ]),
-  getItem("Album/EP", "", <DesktopOutlined />, [
+  getItem("Album/EP", "albums", <DesktopOutlined />, [
     getItem("Danh sách Album/EP", "album"),
-    getItem("Thêm Album/EP", "add-album"),
-    getItem("Cập nhật nghệ sĩ", "update-album"),
+    getItem("Thêm Album/EP", "album/create"),
+    getItem("Cập nhật nghệ sĩ", "album/update"),
   ]),
   getItem("Danh sách phát", "playlist", <DesktopOutlined />),
 ];
@@ -37,6 +37,7 @@ const pageTitles = {
   album: "Danh sách Album",
   playlist: "Danh sách phát",
 };
+const MemoizedMenuItem = React.memo(Menu.Item);
 
 const LayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -47,7 +48,8 @@ const LayoutAdmin = () => {
   const location = useLocation(); // <-- Lấy URL hiện tại
   const navigate = useNavigate(); // <-- Để điều hướng khi click menu
 
-  const path = location.pathname.split("/")[2] || "dashboard";
+  const path = location.pathname.replace("/admin/", "");
+
   // Giả sử path là /admin/songs => lấy "songs"
 
   return (
@@ -56,6 +58,12 @@ const LayoutAdmin = () => {
         collapsible
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
+        style={{
+          position: "sticky", // Cố định khi cuộn
+          top: 0, // Cố định từ trên cùng
+          height: "100vh", // Chiều cao chiếm hết màn hình
+          zIndex: 100, // Đảm bảo Sider nằm trên các phần tử khác
+        }}
       >
         <div className="logo p-2">
           <SpotifyIcon />
@@ -63,8 +71,10 @@ const LayoutAdmin = () => {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[path]} // <-- Auto select theo route hiện tại
-          onClick={({ key }) => navigate(`/admin/${key}`)} // <-- Điều hướng khi click
+          selectedKeys={[path]}
+          onClick={({ key }) => {
+            navigate(`/admin/${key}`);
+          }}
           items={items}
         />
       </Sider>
@@ -75,7 +85,7 @@ const LayoutAdmin = () => {
         <Content style={{ margin: "10px 16px" }}>
           <div
             style={{
-              padding: 24,
+              padding: 20,
               minHeight: 360,
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
