@@ -17,6 +17,17 @@ export const fetchAlbums = createAsyncThunk(
     }
   }
 );
+export const fetchAlbumById = createAsyncThunk(
+  "album/fetchAlbumById",
+  async (albumId, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`http://localhost:8080/api/album/${albumId}`);
+      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Fetch failed");
+    }
+  }
+);
 export const toggleAlbumStatus = createAsyncThunk(
   "album/updateStatus",
   async (albumId, { rejectWithValue }) => {
@@ -30,29 +41,120 @@ export const toggleAlbumStatus = createAsyncThunk(
     }
   }
 );
+export const fetchAlbumsSelect = createAsyncThunk(
+  "artist/fetchAlbumsSelect",
+  async (thunkAPI) => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/album/allstatus", {
+        params: {
+          pageNo: 0,
+          pageSize: 1000, // để lấy tất cả
+          sortBy: "title",
+          sortDir: "asc",
+          status: true, // hoặc false tùy bạn muốn lấy active hay đã bị disable
+        },
+      });
+      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Fetch failed"
+      );
+    }
+  }
+);
+export const createAlbum = createAsyncThunk(
+  "album/createAlbum",
+  async (albumData, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append(
+        "albumRequestDTO",
+        new Blob(
+          [
+            JSON.stringify({
+              title: albumData.title,
+              releaseDate: albumData.releaseDate,
+              artistId: albumData.artistId,
+              type: albumData.type,
+            }),
+          ],
+          { type: "application/json" }
+        )
+      );
+      // Kiểm tra xem albumData.image có tồn tại và image[0] có tồn tại originFileObj không
+      formData.append("coverImage", albumData.image[0].originFileObj);
+
+      const res = await axios.post(
+        "http://localhost:8080/api/album/create",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return res.data.result;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+export const updateAlbum = createAsyncThunk(
+  "album/updateAlbum",
+  async (albumData, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append(
+        "albumUpdateDTO",
+        new Blob(
+          [
+            JSON.stringify({
+              albumId: albumData.albumId,
+              title: albumData.title,
+              releaseDate: albumData.releaseDate,
+              artistId: albumData.artistId,
+              type: albumData.type,
+            }),
+          ],
+          { type: "application/json" }
+        )
+      );
+      formData.append("coverImage", albumData.image[0].originFileObj);
+
+      const res = await axios.put(
+        "http://localhost:8080/api/album/update",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return res.data.result;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
 const albumSlice = createSlice({
   name: "album",
   initialState: {
     items: [],
-    loading: false,
-    error: null,
+    albumSelected: {},
   },
   reducers: {
     // Nếu có thêm action khác như add/update/delete thì viết ở đây
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAlbums.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(fetchAlbums.fulfilled, (state, action) => {
-        state.loading = false;
         state.items = action.payload;
       })
-      .addCase(fetchAlbums.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+      .addCase(fetchAlbumById.fulfilled, (state, action) => {
+        state.albumSelected = action.payload;
+      })
+      .addCase(fetchAlbumsSelect.fulfilled, (state, action) => {
+        state.items = action.payload;
       })
       .addCase(toggleAlbumStatus.fulfilled, (state, action) => {
         const updatedAlbum = action.payload;
@@ -77,4 +179,12 @@ const albumSlice = createSlice({
       });
   },
 });
+
+export const selectItemsAlbum = (state) => {
+  return state.album.items; // trả về mảng artist
+};
+export const selectAlbum = (state) => {
+  return state.album.albumSelected; // trả về album được chọn
+};
+
 export default albumSlice.reducer;

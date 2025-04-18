@@ -51,7 +51,7 @@ function ProfileHeader() {
       }
 
       const response = await axios.put(
-        "http://localhost:8082/api/user/me",
+        "http://localhost:8080/api/user/me",
         formData,
         {
           headers: {

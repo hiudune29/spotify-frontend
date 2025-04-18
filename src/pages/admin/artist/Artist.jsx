@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchArtists,
   toggleArtistStatus,
-} from "../../redux/slice/artistSlice"; // Giả sử bạn có action này
+} from "../../../redux/slice/artistSlice"; // Giả sử bạn có action này
 import { Table, Button, Space, Modal, Card } from "antd";
+import AdminTable from "../../../components/admin/ui/Table"; // Giả sử bạn có component này
 
 const Artist = () => {
   const dispatch = useDispatch();
@@ -44,13 +45,13 @@ const Artist = () => {
     },
     {
       title: "Hình ảnh",
-      dataIndex: "coverImage",
-      key: "coverImage",
+      dataIndex: "img",
+      key: "img",
       render: (url) => (
         <img
           src={url}
           alt="Cover"
-          style={{ width: 80, height: 80, objectFit: "cover" }}
+          style={{ width: 40, height: 40, objectFit: "cover" }}
         />
       ),
     },
@@ -116,7 +117,7 @@ const Artist = () => {
     },
   ];
 
-  const handleChange = (pagination, filters, sorter) => {
+  const handleChange = (pagination, sorter) => {
     setSortedInfo(sorter);
     dispatch(
       fetchArtists({
@@ -155,17 +156,14 @@ const Artist = () => {
           </ul>
         </Card>
       </Modal>
-      <Table
+      <AdminTable
         columns={columns}
         dataSource={artists}
         rowKey="artistId"
-        pagination={{
-          current: pageNo + 1,
-          pageSize: pageSize,
-          total: totalElements,
-          showSizeChanger: true,
-        }}
-        onChange={handleChange}
+        handleChange={handleChange}
+        pageNo={pageNo}
+        pageSize={pageSize}
+        totalElements={totalElements}
       />
     </div>
   );
