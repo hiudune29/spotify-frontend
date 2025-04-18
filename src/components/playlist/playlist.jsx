@@ -1,19 +1,71 @@
 import { Clock, Play } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
+import axios from "axios";
+import { message } from "antd"; // Thêm import message
 import {
   setCurrentSong,
   setCurrentSongIndex,
+  fetchPlaylistSongs,
 } from "../../redux/slice/playlistSlice";
 
-// Thêm currentPlayingSongId vào props
-const Playlist = ({ songs, currentPlayingSongId }) => {
+message.config({
+  duration: 2,
+  maxCount: 3,
+  bottom: 100, // Khoảng cách từ bottom lên
+});
+
+const Playlist = ({
+  songs,
+  currentPlayingSongId,
+  showOptions = false,
+  playlistId,
+}) => {
   const dispatch = useDispatch();
+  const [activeOptionsId, setActiveOptionsId] = useState(null);
+  const menuRef = useRef();
 
   const handlePlaySong = (song, index) => {
     dispatch(setCurrentSong(song));
     dispatch(setCurrentSongIndex(index));
   };
+
+  const handleViewInfo = (song) => {
+    console.log("Thông tin bài hát:", song);
+    setActiveOptionsId(null);
+  };
+
+  const handleRemoveFromPlaylist = async (song) => {
+    try {
+      await axios.put("http://localhost:8080/api/playlists/removesong", null, {
+        params: {
+          playlist: playlistId,
+          song: song.songId,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      message.success(`Đã xóa bài hát "${song.songName}" khỏi playlist`);
+      dispatch(fetchPlaylistSongs(playlistId));
+    } catch (error) {
+      console.error("Lỗi khi xóa bài hát khỏi playlist:", error);
+      message.error("Không thể xóa bài hát khỏi playlist");
+    } finally {
+      setActiveOptionsId(null);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveOptionsId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <table
@@ -45,17 +97,12 @@ const Playlist = ({ songs, currentPlayingSongId }) => {
               }`}
               onDoubleClick={() => handlePlaySong(song, index)}
             >
-              <td className="py-3 w-10 text-center">
-                <div className="flex items-center justify-center">
-                  {isPlaying ? (
-                    <Play className="w-4 h-4 text-[#1ed760]" />
-                  ) : (
-                    <>
-                      <span className="group-hover:hidden">{index + 1}</span>
-                      <Play className="w-4 h-4 text-gray-500 hidden group-hover:block" />
-                    </>
-                  )}
-                </div>
+              <td className="py-3 text-center">
+                {isPlaying ? (
+                  <Play className="w-4 h-4 text-[#1ed760]" />
+                ) : (
+                  <>{index + 1}</>
+                )}
               </td>
               <td className="py-3 w-[40%]">
                 <div className="flex items-center gap-2">
@@ -89,20 +136,46 @@ const Playlist = ({ songs, currentPlayingSongId }) => {
               <td className="py-3 w-[15%] text-center relative">
                 {Math.floor(song.duration / 60)}:
                 {(song.duration % 60).toString().padStart(2, "0")}
-                <svg
-                  className="w-4 h-4 text-gray-400 hidden group-hover:block absolute right-4 top-1/2 transform -translate-y-1/2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 6v.01M12 12v.01M12 18v.01"
-                  />
-                </svg>
+                {showOptions && (
+                  <div className="inline-block ml-2 relative" ref={menuRef}>
+                    <svg
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveOptionsId(
+                          activeOptionsId === song.songId ? null : song.songId
+                        );
+                      }}
+                      className="w-4 h-4 text-gray-400 hover:text-white cursor-pointer"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 6v.01M12 12v.01M12 18v.01"
+                      />
+                    </svg>
+                    {activeOptionsId === song.songId && (
+                      <div className="absolute top-full right-0 mt-2 z-50 bg-zinc-800 border border-zinc-700 rounded-md shadow-md w-40 text-sm">
+                        <button
+                          onClick={() => handleViewInfo(song)}
+                          className="block w-full text-left px-4 py-2 hover:bg-zinc-700 text-white"
+                        >
+                          Xem thông tin
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFromPlaylist(song)}
+                          className="block w-full text-left px-4 py-2 hover:bg-zinc-700 text-red-400"
+                        >
+                          Xóa khỏi playlist
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </td>
             </tr>
           );

@@ -19,7 +19,7 @@ const SidebarHeader = ({ onToggle, isExpanded }) => {
         isPrivate: true,
         description: "Playlist của tôi",
         coverImage: defaultCover, // Using imported default cover image
-        isPlaylistLiked: false,
+        status: true,
         userId: userId, // Should be dynamic based on logged in user
       };
 

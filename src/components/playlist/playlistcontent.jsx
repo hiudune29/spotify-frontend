@@ -12,8 +12,9 @@ import {
 
 const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
   const dispatch = useDispatch();
-  const { currentPlaylist, currentPlayingSongId, isPlaying, currentSong } =
-    useSelector((state) => state.playlists);
+  const { currentPlaylist, currentPlayingSongId, isPlaying } = useSelector(
+    (state) => state.playlists
+  );
 
   const handlePlay = () => {
     if (type === "song" && singleSong) {
@@ -104,6 +105,8 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
           <Playlist
             songs={currentPlaylist.songs || []}
             currentPlayingSongId={currentPlayingSongId}
+            showOptions={true}
+            playlistId={currentPlaylist.playlist?.playlistId}
           />
         </div>
       </>
