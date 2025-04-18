@@ -77,7 +77,7 @@ const Playlist = ({
           <th className="py-3 w-10 text-center">#</th>
           <th className="py-3 w-[40%]">Tiêu đề</th>
           <th className="py-3 w-[25%]">Album</th>
-          <th className="py-3 w-[20%]">Ngày thêm</th>
+          <th className="py-3 w-[20%]">Ngày phát hành</th>
           <th className="py-3 w-[15%] text-center">
             <Clock className="w-4 h-4 inline-block" />
           </th>
