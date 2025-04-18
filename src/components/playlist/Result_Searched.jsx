@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setCurrentSong,
   setSelectedSong,
@@ -7,17 +7,15 @@ import {
 import {
   setShowUserProfile,
   clearSearchQuery,
+  fetchSearchResults,
 } from "../../redux/slice/searchSlice";
 import "./Result_Searched.css";
 
 // Component mới: AddSongPlaylist
 const AddSongPlaylist = ({ song, onClose }) => {
   const [playlistSearch, setPlaylistSearch] = useState("");
-  const playlists = [
-    { id: 1, name: "APT.", artist: "ROSÉ, Bruno Mars" },
-    { id: 2, name: "Chill Hits", artist: "Various Artists" },
-    { id: 3, name: "My Playlist #2", artist: "User" },
-  ];
+  const { searchResults } = useSelector((state) => state.search);
+  const playlists = searchResults?.playlists || [];
 
   const filteredPlaylists = playlists.filter((playlist) =>
     playlist.name.toLowerCase().includes(playlistSearch.toLowerCase())
@@ -47,26 +45,32 @@ const AddSongPlaylist = ({ song, onClose }) => {
           />
         </div>
         <div className="playlist-list">
-          {filteredPlaylists.map((playlist) => (
-            <div
-              key={playlist.id}
-              className="playlist-item"
-              onClick={() => handleAddToPlaylist(playlist)}
-            >
-              <div className="playlist-details">
-                <span className="playlist-name">{playlist.name}</span>
-                <span className="playlist-artist">{playlist.artist}</span>
+          {filteredPlaylists.length > 0 ? (
+            filteredPlaylists.map((playlist) => (
+              <div
+                key={playlist.playlist_id}
+                className="playlist-item"
+                onClick={() => handleAddToPlaylist(playlist)}
+              >
+                <div className="playlist-details">
+                  <span className="playlist-name">{playlist.name}</span>
+                  <span className="playlist-artist">
+                    {playlist.description || "Playlist"}
+                  </span>
+                </div>
+                <span className="playlist-duration">-</span>
               </div>
-              <span className="playlist-duration">2:49</span>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="text-white text-center">No playlists found.</div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-// Component CardSong (giữ nguyên)
+// Component CardSong (Giữ nguyên nhưng không sử dụng trong Songs Section)
 const CardSong = ({ song, onSongClick }) => {
   const dispatch = useDispatch();
 
@@ -112,7 +116,11 @@ const ArtistCard = ({ artist, onClick }) => {
   return (
     <div className="artist-card" onClick={() => onClick(artist)}>
       <div className="relative">
-        <img src={artist.img} alt={artist.name} />
+        <img
+          src={artist.img || "https://via.placeholder.com/180"}
+          alt={artist.name}
+          className="w-[180px] h-[180px] object-cover rounded-md"
+        />
       </div>
       <h3>{artist.name}</h3>
       <p>{artist.description}</p>
@@ -123,9 +131,6 @@ const ArtistCard = ({ artist, onClick }) => {
 // Component: AlbumCard (sử dụng album_id, title, cover_image, artist_id)
 const AlbumCard = ({ album, onClick }) => {
   const dispatch = useDispatch();
-  const artistName =
-    artistsData.find((artist) => artist.artist_id === album.artist_id)?.name ||
-    "Unknown Artist";
 
   const handlePlay = (e) => {
     e.stopPropagation();
@@ -135,7 +140,11 @@ const AlbumCard = ({ album, onClick }) => {
   return (
     <div className="album-card" onClick={() => onClick(album)}>
       <div className="relative">
-        <img src={album.cover_image} alt={album.title} />
+        <img
+          src={album.cover_image || "https://via.placeholder.com/180"}
+          alt={album.title}
+          className="w-[180px] h-[180px] object-cover rounded-md"
+        />
         <button onClick={handlePlay} className="play-button">
           <svg
             className="w-6 h-6"
@@ -148,7 +157,7 @@ const AlbumCard = ({ album, onClick }) => {
         </button>
       </div>
       <h3>{album.title}</h3>
-      <p>{artistName}</p>
+      <p>{album.artistName || "Unknown Artist"}</p>
     </div>
   );
 };
@@ -165,7 +174,11 @@ const PlaylistCard = ({ playlist, onClick }) => {
   return (
     <div className="playlist-card" onClick={() => onClick(playlist)}>
       <div className="relative">
-        <img src={playlist.cover_image} alt={playlist.name} />
+        <img
+          src={playlist.cover_image || "https://via.placeholder.com/180"}
+          alt={playlist.name}
+          className="w-[180px] h-[180px] object-cover rounded-md"
+        />
         <button onClick={handlePlay} className="play-button">
           <svg
             className="w-6 h-6"
@@ -183,175 +196,39 @@ const PlaylistCard = ({ playlist, onClick }) => {
   );
 };
 
-// Dữ liệu mẫu cho Songs (giữ nguyên)
-const songsData = [
-  {
-    songId: 1,
-    songName: "Anxiety",
-    artistName: "Doechii",
-    duration: "4:09",
-    explicit: true,
-    img: "https://via.placeholder.com/180",
-  },
-  {
-    songId: 2,
-    songName: "Another Love",
-    artistName: "Tom Odell",
-    duration: "4:04",
-    explicit: true,
-    img: "https://via.placeholder.com/180",
-  },
-  {
-    songId: 3,
-    songName: "Animals",
-    artistName: "Maroon 5",
-    duration: "3:51",
-    explicit: false,
-    img: "https://via.placeholder.com/180",
-  },
-  {
-    songId: 4,
-    songName: "Angels Like You",
-    artistName: "Miley Cyrus",
-    duration: "3:16",
-    explicit: false,
-    img: "https://via.placeholder.com/180",
-  },
-];
-
-// Dữ liệu mẫu cho Artists (sử dụng artist_id, name, img, description)
-const artistsData = [
-  {
-    artist_id: 5,
-    name: "Anuel AA",
-    img: "https://via.placeholder.com/180",
-    description: "Latin Trap Artist",
-  },
-  {
-    artist_id: 6,
-    name: "Romeo Santos",
-    img: "https://via.placeholder.com/180",
-    description: "Bachata King",
-  },
-  {
-    artist_id: 7,
-    name: "Anuv Jain",
-    img: "https://via.placeholder.com/180",
-    description: "Indie Pop Artist",
-  },
-  {
-    artist_id: 8,
-    name: "Anne-Marie",
-    img: "https://via.placeholder.com/180",
-    description: "Pop Sensation",
-  },
-  {
-    artist_id: 9,
-    name: "Anirudh Ravichander",
-    img: "https://via.placeholder.com/180",
-    description: "Tamil Music Composer",
-  },
-  {
-    artist_id: 10,
-    name: "Anyma",
-    img: "https://via.placeholder.com/180",
-    description: "Electronic Music Artist",
-  },
-  {
-    artist_id: 11,
-    name: "Angèle",
-    img: "https://via.placeholder.com/180",
-    description: "French Pop Star",
-  },
-  {
-    artist_id: 12,
-    name: "Lady Gaga",
-    img: "https://via.placeholder.com/180",
-    description: "Pop Icon",
-  },
-];
-
-// Dữ liệu mẫu cho Albums (sử dụng album_id, title, cover_image, artist_id)
-const albumsData = [
-  {
-    album_id: 13,
-    title: "After Hours",
-    cover_image: "https://via.placeholder.com/180",
-    artist_id: 10,
-  },
-  {
-    album_id: 14,
-    title: "Future Nostalgia",
-    cover_image: "https://via.placeholder.com/180",
-    artist_id: 8,
-  },
-  {
-    album_id: 15,
-    title: "Midnight Marauders",
-    cover_image: "https://via.placeholder.com/180",
-    artist_id: 7,
-  },
-  {
-    album_id: 16,
-    title: "Evermore",
-    cover_image: "https://via.placeholder.com/180",
-    artist_id: 6,
-  },
-  {
-    album_id: 17,
-    title: "Plastic Hearts",
-    cover_image: "https://via.placeholder.com/180",
-    artist_id: 5,
-  },
-];
-
-// Dữ liệu mẫu cho Playlists (sử dụng playlist_id, name, cover_image, description)
-const playlistsData = [
-  {
-    playlist_id: 18,
-    name: "Chill Vibes",
-    cover_image: "https://via.placeholder.com/180",
-    description: "Relax and unwind",
-  },
-  {
-    playlist_id: 19,
-    name: "Workout Hits",
-    cover_image: "https://via.placeholder.com/180",
-    description: "Get pumped up",
-  },
-  {
-    playlist_id: 20,
-    name: "Road Trip",
-    cover_image: "https://via.placeholder.com/180",
-    description: "Perfect for long drives",
-  },
-  {
-    playlist_id: 21,
-    name: "Study Focus",
-    cover_image: "https://via.placeholder.com/180",
-    description: "Stay concentrated",
-  },
-  {
-    playlist_id: 22,
-    name: "Party Mix",
-    cover_image: "https://via.placeholder.com/180",
-    description: "Dance all night",
-  },
-];
-
-// Song Item Component (giữ nguyên)
-const SongItem = ({ title, artist, duration, explicit, song }) => {
+// Song Item Component (Thêm sự kiện click để phát bài hát)
+const SongItem = ({ title, artist, duration, explicit, song, img }) => {
+  const dispatch = useDispatch();
   const [showAddPlaylist, setShowAddPlaylist] = useState(false);
 
   const handleAddClick = (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Ngăn sự kiện click trên nút "+" kích hoạt phát nhạc
     setShowAddPlaylist(true);
+  };
+
+  const handlePlay = () => {
+    dispatch(setCurrentSong(song)); // Phát bài hát khi click vào SongItem
+  };
+
+  // Chuyển đổi duration từ giây sang định dạng phút:giây
+  const formatDuration = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   return (
     <>
-      <div className="song-item group">
-        <div className="song-details">
+      <div
+        className="song-item group flex items-center gap-3 cursor-pointer hover:bg-[#1f1f1f]"
+        onClick={handlePlay} // Thêm sự kiện click để phát bài hát
+      >
+        <img
+          src={img || "https://via.placeholder.com/40"}
+          alt={title}
+          className="w-10 h-10 object-cover rounded-md"
+        />
+        <div className="song-details flex-1">
           <span className="song-title">{title}</span>
           <span className="song-artist">
             {explicit && <span className="explicit-label">E</span>}
@@ -359,7 +236,7 @@ const SongItem = ({ title, artist, duration, explicit, song }) => {
           </span>
         </div>
         <div className="song-actions">
-          <span className="song-duration">{duration}</span>
+          <span className="song-duration">{formatDuration(duration)}</span>
           <button
             className="add-button opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             onClick={handleAddClick}
@@ -381,72 +258,113 @@ const SongItem = ({ title, artist, duration, explicit, song }) => {
 // Main Result_Searched Component
 const Result_Searched = () => {
   const dispatch = useDispatch();
+  const { searchQuery, searchResults, loading, error } = useSelector(
+    (state) => state.search
+  );
+
+  // Gọi API tìm kiếm khi searchQuery thay đổi
+  useEffect(() => {
+    if (searchQuery) {
+      dispatch(fetchSearchResults(searchQuery));
+    }
+  }, [searchQuery, dispatch]);
 
   const handleItemClick = () => {
     dispatch(setShowUserProfile(true));
     dispatch(clearSearchQuery());
   };
 
+  // Nếu đang tải, hiển thị thông báo loading
+  if (loading) {
+    return <div className="text-white text-center">Loading...</div>;
+  }
+
+  // Nếu có lỗi, hiển thị thông báo lỗi
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  // Nếu không có kết quả tìm kiếm, hiển thị thông báo
+  if (!searchResults) {
+    return (
+      <div className="text-white text-center">
+        No results found. Try searching for something else.
+      </div>
+    );
+  }
+
+  // Destructure searchResults với key chính xác từ API
+  const { songResult = [], albumResult = [], playlists = [] } = searchResults;
+
   return (
     <div className="result-searched">
       {/* Songs Section */}
-      <div className="section">
-        <h2 className="section-title">Songs</h2>
-        <div className="songs-list">
-          {songsData.map((song) => (
-            <SongItem
-              key={song.songId}
-              title={song.songName}
-              artist={song.artistName}
-              duration={song.duration}
-              explicit={song.explicit}
-              song={song}
-            />
-          ))}
+      {songResult.length > 0 && (
+        <div className="section">
+          <h2 className="section-title">Songs</h2>
+          <div className="songs-list">
+            {songResult.map((song) => (
+              <SongItem
+                key={song.songId}
+                title={song.songName}
+                artist={song.artistName}
+                duration={song.duration} // API trả về duration dạng giây
+                explicit={song.explicit || false} // API không trả về explicit, mặc định là false
+                img={song.img} // Thêm trường img để hiển thị ảnh
+                song={song}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Artists Section */}
-      <div className="section">
-        <h2 className="section-title">Artists</h2>
-        <div className="artists-list">
-          {artistsData.map((artist) => (
-            <ArtistCard
-              key={artist.artist_id}
-              artist={artist}
-              onClick={handleItemClick}
-            />
-          ))}
+      {/* Artists Section (Comment vì chưa có dữ liệu) */}
+      {/* {artists.length > 0 && (
+        <div className="section">
+          <h2 className="section-title">Artists</h2>
+          <div className="artists-list">
+            {artists.map((artist) => (
+              <ArtistCard
+                key={artist.artist_id}
+                artist={artist}
+                onClick={handleItemClick}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )} */}
 
       {/* Albums Section */}
-      <div className="section">
-        <h2 className="section-title">Albums</h2>
-        <div className="albums-list">
-          {albumsData.map((album) => (
-            <AlbumCard
-              key={album.album_id}
-              album={album}
-              onClick={handleItemClick}
-            />
-          ))}
+      {albumResult.length > 0 && (
+        <div className="section">
+          <h2 className="section-title">Albums</h2>
+          <div className="albums-list">
+            {albumResult.map((album) => (
+              <AlbumCard
+                key={album.album_id}
+                album={album}
+                onClick={handleItemClick}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Playlists Section */}
-      <div className="section">
-        <h2 className="section-title">Playlists</h2>
-        <div className="playlists-list">
-          {playlistsData.map((playlist) => (
-            <PlaylistCard
-              key={playlist.playlist_id}
-              playlist={playlist}
-              onClick={handleItemClick}
-            />
-          ))}
+      {playlists.length > 0 && (
+        <div className="section">
+          <h2 className="section-title">Playlists</h2>
+          <div className="playlists-list">
+            {playlists.map((playlist) => (
+              <PlaylistCard
+                key={playlist.playlist_id}
+                playlist={playlist}
+                onClick={handleItemClick}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
