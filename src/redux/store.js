@@ -5,7 +5,7 @@ import searchReducer from "./slice/searchSlice";
 import albumReducer from "./slice/albumSlice.js";
 import artistReducer from "./slice/artistSlice.js";
 import playlistReducer from "./slice/playlistSlice";
-
+import uiReducer from "./slice/uiSlice";
 export const store = configureStore({
   reducer: {
     song: songReducer,
@@ -14,5 +14,6 @@ export const store = configureStore({
     artist: artistReducer,
     playlists: playlistReducer,
     search: searchReducer,
+    ui: uiReducer,
   },
 });

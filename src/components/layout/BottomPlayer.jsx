@@ -118,12 +118,20 @@ const BottomPlayer = () => {
   };
 
   const toggleRepeat = () => {
+    // Nếu bật chế độ lặp lại, tắt chế độ ngẫu nhiên
+    if (isRandom) {
+      dispatch(toggleRandom());
+    }
     const nextMode = (repeatMode + 1) % 3;
     dispatch(setRepeatMode(nextMode));
   };
 
   const handleToggleRandom = () => {
     if (!currentSong) return;
+    // Nếu bật chế độ ngẫu nhiên, tắt chế độ lặp lại
+    if (repeatMode > 0) {
+      dispatch(setRepeatMode(0));
+    }
     dispatch(toggleRandom());
   };
 
@@ -256,6 +264,7 @@ const BottomPlayer = () => {
             className={`control-btn ${isRandom ? "active" : ""}`}
             onClick={handleToggleRandom}
             disabled={!currentSong}
+            title={isRandom ? "Tắt phát ngẫu nhiên" : "Bật phát ngẫu nhiên"}
           >
             <FaRandom />
           </button>
@@ -295,6 +304,13 @@ const BottomPlayer = () => {
             className={`control-btn ${repeatMode > 0 ? "active" : ""}`}
             onClick={toggleRepeat}
             disabled={!currentSong}
+            title={
+              repeatMode === 0
+                ? "Bật lặp lại"
+                : repeatMode === 1
+                ? "Lặp lại một bài"
+                : "Lặp lại playlist"
+            }
           >
             <FaRedo />
             {repeatMode === 1 && <span className="repeat-indicator">1</span>}
