@@ -60,7 +60,7 @@ const Playlist = ({ songs, currentPlayingSongId }) => {
               <td className="py-3 w-[40%]">
                 <div className="flex items-center gap-2">
                   <img
-                    src={song.img}
+                    src={song.img || "https://via.placeholder.com/150"}
                     alt={song.songName}
                     className="w-10 h-10 object-cover rounded-md"
                   />
