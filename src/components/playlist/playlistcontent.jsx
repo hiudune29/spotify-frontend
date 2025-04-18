@@ -12,15 +12,24 @@ import {
 
 const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
   const dispatch = useDispatch();
+
   const { currentPlaylist, currentPlayingSongId, isPlaying, loading } =
     useSelector((state) => state.playlists);
   const { showPlaylist, selectedPlaylist } = useSelector(
     (state) => state.search
   );
 
-  // Sử dụng selectedPlaylist nếu showPlaylist là true
+  // Sửa lại cách lấy playlistData
   const playlistData =
     showPlaylist && selectedPlaylist ? selectedPlaylist : currentPlaylist;
+
+  // Kiểm tra và log dữ liệu
+  console.log("PlaylistContent received:", {
+    type,
+    playlistData,
+    selectedPlaylist,
+    currentPlaylist,
+  });
 
   const handlePlay = () => {
     if (type === "song" && singleSong) {
@@ -52,7 +61,57 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
   };
 
   const renderContent = () => {
-    if (type === "song" && singleSong) {
+    // Log để debug
+    console.log("Rendering content with:", {
+      playlistData,
+      type,
+      selectedPlaylist,
+    });
+
+    // Xử lý cho album
+    if (playlistData?.type === "album") {
+      const albumData = {
+        name: playlistData.album.title,
+        description: playlistData.album.description || "",
+        coverImage: playlistData.album.coverImage,
+        user: {
+          fullName: playlistData.album.artist?.name || "Unknown Artist",
+          userId: playlistData.album.artist?.artistId,
+        },
+        playlistId: playlistData.album.albumId,
+      };
+
+      return (
+        <>
+          <PlaylistHeader
+            content={albumData}
+            type="album"
+            songs={playlistData.songs || []}
+          />
+          <div className="flex flex-col flex-1 w-full p-4 bg-black/20">
+            <div className="flex flex-row items-center gap-4 m-3">
+              <ButtonPlay
+                onClick={handlePlay}
+                isPlaying={
+                  isPlaying &&
+                  playlistData.songs?.some(
+                    (song) => song.songId === currentPlayingSongId
+                  )
+                }
+              />
+            </div>
+            <Playlist
+              songs={playlistData.songs || []}
+              currentPlayingSongId={currentPlayingSongId}
+              showOptions={false}
+            />
+          </div>
+        </>
+      );
+    }
+
+    // Xử lý cho single song
+    if (singleSong) {
       const songData = {
         name: singleSong.songName,
         description: singleSong.artistName,
@@ -82,18 +141,28 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
       );
     }
 
-    if (!playlistData || !playlistData.playlist) {
+    // Xử lý cho playlist thường
+    if (!playlistData?.playlist && !singleSong) {
       return (
-        <div className="text-white text-center">No playlist data available</div>
+        <div className="text-white text-center p-8">
+          No playlist data available
+        </div>
       );
     }
+
+    const contentData = type === "album" ? playlistData : playlistData.playlist;
 
     return (
       <>
         <PlaylistHeader
-          content={playlistData.playlist}
-          type="playlist"
-          songs={playlistData.songs}
+          content={{
+            name: contentData.name || contentData.title,
+            description: contentData.description,
+            coverImage: contentData.coverImage,
+            user: contentData.user,
+          }}
+          type={type}
+          songs={playlistData.songs || []}
         />
         <div className="flex flex-col flex-1 w-full p-4 bg-black/20">
           <div className="flex flex-row items-center gap-4 m-3">

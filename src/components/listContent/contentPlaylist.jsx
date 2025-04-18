@@ -6,6 +6,7 @@ import {
   setCurrentSong,
   setSelectedSong,
   setQueue,
+  togglePlay,
 } from "../../redux/slice/playlistSlice";
 import PlaylistContent from "../playlist/playlistcontent";
 import "../../style/contentPlaylist.css";
@@ -13,10 +14,19 @@ import "../../style/contentPlaylist.css";
 const CardSong = ({ song, onSongClick }) => {
   const dispatch = useDispatch();
 
-  // Xử lý khi nhấn nút play
+  // Sửa lại hàm xử lý khi nhấn nút play
   const handlePlay = (e) => {
     e.stopPropagation(); // Ngăn không cho sự kiện click bubble lên div cha
+
+    // Tạo queue mới chỉ với bài hát hiện tại
+    const newQueue = [song];
+
+    // Set queue mới
+    dispatch(setQueue(newQueue));
+    // Set bài hát hiện tại
     dispatch(setCurrentSong(song));
+    // Đảm bảo phát nhạc
+    dispatch(togglePlay(true));
   };
 
   return (
@@ -56,10 +66,11 @@ const CardSong = ({ song, onSongClick }) => {
 
 const MusicSession = () => {
   const dispatch = useDispatch();
-  const { songs, loading, selectedSong, currentPlaylist, showPlaylistContent } =
-    useSelector((state) => state.playlists);
+  const { songs, loading, selectedSong, showPlaylistContent } = useSelector(
+    (state) => state.playlists
+  );
   const recommendedRef = useRef(null);
-  console.log("songs", songs);
+
   useEffect(() => {
     dispatch(fetchSongs());
   }, [dispatch]);

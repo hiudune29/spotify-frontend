@@ -1,4 +1,6 @@
 .result-searched {
+  min-height: 82.6vh;
+  border-radius: 10px;
   padding: 20px;
   background-color: #121212;
   color: #fff;

@@ -4,7 +4,8 @@ import {
   setCurrentSong,
   setSelectedSong,
   setQueue,
-  clearQueue, // Added clearQueue
+  clearQueue,
+  togglePlay, // Added clearQueue
 } from "../../redux/slice/playlistSlice";
 import {
   setShowUserProfile,
@@ -147,20 +148,55 @@ const AlbumCard = ({ album, onClick }) => {
 
   const handlePlay = (e) => {
     e.stopPropagation();
-    dispatch(setCurrentSong(album));
+    if (album.songs && album.songs.length > 0) {
+      // Clear existing queue
+      dispatch(clearQueue());
+      // Set new queue with album songs
+      dispatch(setQueue(album.songs));
+      // Set first song as current
+      dispatch(setCurrentSong(album.songs[0]));
+      // Start playing
+      dispatch(togglePlay(true));
+    }
   };
 
-  const albumData = album.album || {};
+  const handleAlbumClick = () => {
+    // Prepare album data in the format expected by PlaylistContent
+    const formattedAlbum = {
+      type: "album",
+      songs: album.songs || [],
+      album: {
+        albumId: album.albumId,
+        title: album.title,
+        description: album.description || "",
+        coverImage: album.coverImage,
+        artist: album.artist,
+        releaseDate: album.releaseDate,
+        createdAt: album.createdAt,
+        status: album.status,
+        type: album.type,
+      },
+    };
+
+    console.log("Formatted Album Data:", formattedAlbum);
+    onClick("album", formattedAlbum);
+  };
 
   return (
-    <div className="album-card" onClick={() => onClick(album)}>
+    <div
+      className="w-[200px] bg-[#121212] rounded-lg shadow-sm flex-shrink-0 p-2 relative group hover:bg-[#1f1f1f] cursor-pointer"
+      onClick={handleAlbumClick}
+    >
       <div className="relative">
         <img
-          src={albumData.coverImage || "https://via.placeholder.com/180"}
-          alt={albumData.title || "Album"}
+          src={album.coverImage || "https://via.placeholder.com/180"}
+          alt={album.title || "Album"}
           className="w-[180px] h-[180px] object-cover rounded-md"
         />
-        <button onClick={handlePlay} className="play-button">
+        <button
+          onClick={handlePlay}
+          className="absolute bottom-2 right-2 bg-[#1ed760] text-black rounded-full w-12 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        >
           <svg
             className="w-6 h-6"
             fill="currentColor"
@@ -171,8 +207,12 @@ const AlbumCard = ({ album, onClick }) => {
           </svg>
         </button>
       </div>
-      <h3>{albumData.title || "Unknown Album"}</h3>
-      <p>{albumData.artist?.name || "Unknown Artist"}</p>
+      <h3 className="mt-2 text-sm font-medium text-white leading-tight">
+        {album.title || "Unknown Album"}
+      </h3>
+      <p className="mt-1 text-xs font-normal text-gray-400 truncate">
+        {album.artist?.name || "Unknown Artist"}
+      </p>
     </div>
   );
 };
@@ -295,6 +335,18 @@ const Result_Searched = () => {
   const handleItemClick = (type, data) => {
     if (type === "playlist") {
       dispatch(setShowPlaylist({ show: true, playlist: data }));
+    } else if (type === "album") {
+      // Format album data for PlaylistContent
+      const albumContent = {
+        show: true,
+        playlist: {
+          type: "album",
+          songs: data.songs || [],
+          album: data.album,
+        },
+      };
+      console.log("Dispatching album data:", albumContent);
+      dispatch(setShowPlaylist(albumContent));
     } else {
       dispatch(setShowPlaylist({ show: false, playlist: null }));
       dispatch(setShowUserProfile(true));

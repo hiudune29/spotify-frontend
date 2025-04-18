@@ -134,6 +134,41 @@ export const fetchPlaylistSongs = createAsyncThunk(
   }
 );
 
+export const fetchRandomSong = createAsyncThunk(
+  "playlists/fetchRandomSong",
+  async (excludeSongId, { rejectWithValue }) => {
+    try {
+      // Log để debug
+      console.log("Calling random API with excludeSongId:", excludeSongId);
+
+      // Xây dựng URL với điều kiện
+      const url = excludeSongId
+        ? `http://localhost:8080/api/songs/random?exclude=${excludeSongId}`
+        : `http://localhost:8080/api/songs/random`;
+
+      console.log("API URL:", url);
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Log response để debug
+      console.log("API Response:", response.data);
+
+      if (!response.data.result) {
+        throw new Error("No song received from API");
+      }
+
+      return response.data.result;
+    } catch (error) {
+      console.error("Error in fetchRandomSong:", error);
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const initialState = {
   items: [],
   songs: [],
@@ -304,6 +339,14 @@ const playlistSlice = createSlice({
       .addCase(fetchPlaylistSongs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchRandomSong.fulfilled, (state, action) => {
+        state.queue.push(action.payload);
+        if (!state.currentSong) {
+          state.currentSong = action.payload;
+          state.currentSongIndex = state.queue.length - 1;
+          state.currentPlayingSongId = action.payload.songId;
+        }
       });
   },
 });
