@@ -5,6 +5,7 @@ import {
   fetchSongs,
   setCurrentSong,
   setSelectedSong,
+  setQueue,
 } from "../../redux/slice/playlistSlice";
 import PlaylistContent from "../playlist/playlistcontent";
 import "../../style/contentPlaylist.css";
@@ -79,9 +80,15 @@ const MusicSession = () => {
   };
 
   const handleSongClick = (song) => {
-    if (!currentPlaylist) {
-      dispatch(setSelectedSong(song));
-    }
+    // Thêm log để kiểm tra
+    console.log("Single song clicked:", song);
+
+    // Tạo queue mới chỉ với bài hát được chọn
+    const newQueue = [song];
+    console.log("New queue:", newQueue);
+
+    dispatch(setQueue(newQueue));
+    dispatch(setSelectedSong(song)); // Vẫn giữ lại để hiển thị chi tiết bài hát
   };
 
   // Nếu có bài hát được chọn, hiển thị PlaylistContent

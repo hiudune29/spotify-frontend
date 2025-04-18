@@ -45,7 +45,7 @@ const Avatar = ({ src, name, description, playlistId, isPrivate, canEdit }) => {
 
 const PlaylistHeader = ({ content, type = "playlist", songs = [] }) => {
   const currentUserId = useSelector((state) => state.user.userId);
-  const { currentPlaylist } = useSelector((state) => state.playlists);
+  // const { currentPlaylist } = useSelector((state) => state.playlists);
 
   if (!content) return null;
 
@@ -54,9 +54,9 @@ const PlaylistHeader = ({ content, type = "playlist", songs = [] }) => {
     content;
   const creator = user.fullName;
 
-  // Thêm log để debug
-  console.log("Content data:", content);
-  console.log("PlaylistId from content:", playlistId);
+  // // Thêm log để debug
+  // console.log("Content data:", content);
+  // console.log("PlaylistId from content:", playlistId);
 
   const songCount = songs.length;
   const totalDuration = songs.reduce((sum, s) => sum + (s.duration || 0), 0);
@@ -72,11 +72,11 @@ const PlaylistHeader = ({ content, type = "playlist", songs = [] }) => {
   const isPlaylist = type === "playlist";
   const canEdit = Boolean(isOwner && isPlaylist);
 
-  console.log("💡 currentUserId:", currentUserId);
-  console.log("📀 playlistUserId:", user.id);
-  console.log("🎵 type:", type);
-  console.log("🛠️ canEdit:", canEdit);
-  console.log("Current Playlist:", currentPlaylist);
+  // console.log("💡 currentUserId:", currentUserId);
+  // console.log("📀 playlistUserId:", user.id);
+  // console.log("🎵 type:", type);
+  // console.log("🛠️ canEdit:", canEdit);
+  // console.log("Current Playlist:", currentPlaylist);
 
   return (
     <div className="flex flex-row w-full text-white">

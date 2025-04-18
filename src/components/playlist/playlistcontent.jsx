@@ -1,26 +1,46 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux"; // Add useDispatch
+import { useSelector, useDispatch } from "react-redux";
 import PlaylistHeader from "./playlistheader";
 import { Ellipsis } from "lucide-react";
 import ButtonPlay from "../ui/buttonplay";
 import Playlist from "./playlist";
-import { setCurrentSong, togglePlay } from "../../redux/slice/playlistSlice"; // Add these imports
+import {
+  setQueue,
+  togglePlay,
+  setCurrentSong,
+} from "../../redux/slice/playlistSlice";
 
 const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
-  const dispatch = useDispatch(); // Add dispatch
-  const { currentPlaylist, currentPlayingSongId, isPlaying } = useSelector(
-    (state) => state.playlists
-  );
+  const dispatch = useDispatch();
+  const { currentPlaylist, currentPlayingSongId, isPlaying, currentSong } =
+    useSelector((state) => state.playlists);
 
   const handlePlay = () => {
     if (type === "song" && singleSong) {
-      // Play single song
-      dispatch(setCurrentSong(singleSong));
-      dispatch(togglePlay(true));
+      // Nếu bài hát đang phát là single song này
+      if (currentPlayingSongId === singleSong.songId) {
+        dispatch(togglePlay(!isPlaying));
+      } else {
+        // Nếu là bài khác, set queue mới và phát
+        dispatch(setQueue([singleSong]));
+        dispatch(setCurrentSong(singleSong));
+        dispatch(togglePlay(true));
+      }
     } else if (currentPlaylist?.songs?.length > 0) {
-      // Play first song from playlist
-      dispatch(setCurrentSong(currentPlaylist.songs[0]));
-      dispatch(togglePlay(true));
+      // Kiểm tra xem có bài hát nào đang phát từ playlist này không
+      const isPlayingFromThisPlaylist = currentPlaylist.songs.some(
+        (song) => song.songId === currentPlayingSongId
+      );
+
+      if (isPlayingFromThisPlaylist) {
+        // Nếu đang phát từ playlist này thì toggle play/pause
+        dispatch(togglePlay(!isPlaying));
+      } else {
+        // Nếu chưa phát từ playlist này, set queue mới và phát từ đầu
+        dispatch(setQueue(currentPlaylist.songs));
+        dispatch(setCurrentSong(currentPlaylist.songs[0]));
+        dispatch(togglePlay(true));
+      }
     }
   };
 
