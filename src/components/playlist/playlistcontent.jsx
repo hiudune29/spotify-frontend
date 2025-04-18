@@ -12,7 +12,7 @@ import {
 
 const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
   const dispatch = useDispatch();
-  const { currentPlaylist, currentPlayingSongId, isPlaying, currentSong } =
+  const { currentPlaylist, currentPlayingSongId, isPlaying, loading } =
     useSelector((state) => state.playlists);
   const { showPlaylist, selectedPlaylist } = useSelector(
     (state) => state.search
@@ -33,9 +33,9 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
         dispatch(setCurrentSong(singleSong));
         dispatch(togglePlay(true));
       }
-    } else if (currentPlaylist?.songs?.length > 0) {
+    } else if (playlistData?.songs?.length > 0) {
       // Kiểm tra xem có bài hát nào đang phát từ playlist này không
-      const isPlayingFromThisPlaylist = currentPlaylist.songs.some(
+      const isPlayingFromThisPlaylist = playlistData.songs.some(
         (song) => song.songId === currentPlayingSongId
       );
 
@@ -44,8 +44,8 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
         dispatch(togglePlay(!isPlaying));
       } else {
         // Nếu chưa phát từ playlist này, set queue mới và phát từ đầu
-        dispatch(setQueue(currentPlaylist.songs));
-        dispatch(setCurrentSong(currentPlaylist.songs[0]));
+        dispatch(setQueue(playlistData.songs));
+        dispatch(setCurrentSong(playlistData.songs[0]));
         dispatch(togglePlay(true));
       }
     }
@@ -82,8 +82,10 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
       );
     }
 
-    if (!playlistData) {
-      return <div>No playlist data available</div>;
+    if (!playlistData || !playlistData.playlist) {
+      return (
+        <div className="text-white text-center">No playlist data available</div>
+      );
     }
 
     return (
@@ -115,7 +117,7 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
     );
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="text-white text-center">Loading...</div>;
 
   return (
     <div className="flex flex-col h-full w-full rounded-xl bg-gradient-to-b from-[#6c04ab] to-[#1A0A12] text-white overflow-auto custom-scrollbar">

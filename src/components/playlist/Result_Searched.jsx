@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setCurrentSong,
   setSelectedSong,
+  setQueue,
+  clearQueue, // Added clearQueue
 } from "../../redux/slice/playlistSlice";
 import {
   setShowUserProfile,
@@ -12,10 +14,10 @@ import {
 } from "../../redux/slice/searchSlice";
 import "./Result_Searched.css";
 
-// Component mới: AddSongPlaylist
+// Component: AddSongPlaylist
 const AddSongPlaylist = ({ song, onClose }) => {
   const [playlistSearch, setPlaylistSearch] = useState("");
-  const { items: playlists = [] } = useSelector((state) => state.playlists); // Lấy từ playlists.items
+  const { items: playlists = [] } = useSelector((state) => state.playlists);
 
   const filteredPlaylists = playlists.filter((playlist) =>
     playlist.name.toLowerCase().includes(playlistSearch.toLowerCase())
@@ -70,19 +72,24 @@ const AddSongPlaylist = ({ song, onClose }) => {
   );
 };
 
-// Component CardSong (Giữ nguyên)
+// Component: CardSong
 const CardSong = ({ song, onSongClick }) => {
   const dispatch = useDispatch();
 
-  const handlePlay = (e) => {
-    e.stopPropagation();
-    dispatch(setCurrentSong(song));
+  const handlePlay = (song) => {
+    // Clear existing queue to ensure only the clicked song is included
+    dispatch(clearQueue());
+    // Create new queue with only the clicked song
+    const newQueue = [song];
+    dispatch(setQueue(newQueue));
+    dispatch(setSelectedSong(song));
+    dispatch(setCurrentSong(song)); // Ensure the song plays immediately
   };
 
   return (
     <div
       className="w-[200px] bg-[#121212] rounded-lg shadow-sm flex-shrink-0 p-2 relative group hover:bg-[#1f1f1f]"
-      onClick={() => onSongClick(song)}
+      onClick={() => handlePlay(song)}
     >
       <div className="relative">
         <img
@@ -90,7 +97,13 @@ const CardSong = ({ song, onSongClick }) => {
           alt={song.songName}
           className="w-[180px] h-[180px] object-cover rounded-md"
         />
-        <button onClick={handlePlay} className="play-button">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePlay(song);
+          }}
+          className="play-button"
+        >
           <svg
             className="w-6 h-6"
             fill="currentColor"
@@ -134,7 +147,7 @@ const AlbumCard = ({ album, onClick }) => {
 
   const handlePlay = (e) => {
     e.stopPropagation();
-    dispatch(setCurrentSong(album)); // Lưu ý: Cần sửa nếu album không phải bài hát
+    dispatch(setCurrentSong(album));
   };
 
   const albumData = album.album || {};
@@ -171,7 +184,7 @@ const PlaylistCard = ({ playlist, onClick }) => {
   const handlePlay = (e) => {
     e.stopPropagation();
     if (playlist.songs && playlist.songs.length > 0) {
-      dispatch(setCurrentSong(playlist.songs[0])); // Phát bài hát đầu tiên
+      dispatch(setCurrentSong(playlist.songs[0]));
     }
   };
 
@@ -202,7 +215,7 @@ const PlaylistCard = ({ playlist, onClick }) => {
   );
 };
 
-// Song Item Component
+// Component: SongItem
 const SongItem = ({ title, artist, duration, explicit, song, img }) => {
   const dispatch = useDispatch();
   const [showAddPlaylist, setShowAddPlaylist] = useState(false);
@@ -213,6 +226,12 @@ const SongItem = ({ title, artist, duration, explicit, song, img }) => {
   };
 
   const handlePlay = () => {
+    // Clear existing queue to ensure only the clicked song is included
+    dispatch(clearQueue());
+    // Create new queue with only the clicked song
+    const newQueue = [song];
+    dispatch(setQueue(newQueue));
+    dispatch(setSelectedSong(song));
     dispatch(setCurrentSong(song));
   };
 
@@ -260,7 +279,7 @@ const SongItem = ({ title, artist, duration, explicit, song, img }) => {
   );
 };
 
-// Main Result_Searched Component
+// Main Component: Result_Searched
 const Result_Searched = () => {
   const dispatch = useDispatch();
   const { searchQuery, searchResults, loading, error } = useSelector(
