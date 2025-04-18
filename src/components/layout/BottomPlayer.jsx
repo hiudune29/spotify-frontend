@@ -6,6 +6,10 @@ import {
   togglePlay,
   toggleRandom,
   setRepeatMode,
+  fetchRandomSong,
+  clearQueue, // Thêm clearQueue vào đây
+  setQueue, // Thêm setQueue vào đây
+  setCurrentSong, // Thêm setCurrentSong vào đây
 } from "../../redux/slice/playlistSlice";
 import "./BottomPlayer.css";
 import {
@@ -125,41 +129,94 @@ const BottomPlayer = () => {
 
   const handleNextSong = () => {
     if (!currentSong || queue.length === 0) return;
+
+    const currentIndex = queue.findIndex(
+      (s) => s.songId === currentSong.songId
+    );
+
+    // Nếu đang ở bài cuối cùng
+    if (currentIndex === queue.length - 1) {
+      // Chỉ cho phép phát lại từ đầu nếu repeatMode === 2 (lặp lại playlist/album)
+      if (repeatMode === 2) {
+        dispatch(playNextSong());
+      }
+      return;
+    }
+
     dispatch(playNextSong());
   };
 
   const handlePreviousSong = () => {
     if (!currentSong || queue.length === 0) return;
+
+    const currentIndex = queue.findIndex(
+      (s) => s.songId === currentSong.songId
+    );
+
+    // Nếu đang ở bài đầu tiên
+    if (currentIndex === 0) {
+      // Chỉ cho phép phát bài cuối nếu repeatMode === 2 (lặp lại playlist/album)
+      if (repeatMode === 2) {
+        dispatch(playPreviousSong());
+      }
+      return;
+    }
+
     dispatch(playPreviousSong());
   };
 
-  const handleSongEnded = () => {
+  const handleSongEnded = async () => {
     if (repeatMode === 1) {
-      // Lặp lại bài hiện tại
       audioRef.current.currentTime = 0;
       audioRef.current.play();
       return;
     }
 
-    if (queue.length === 0) {
-      dispatch(togglePlay(false));
-      return;
-    }
+    const currentIndex = queue.findIndex(
+      (s) => s?.songId === currentSong?.songId
+    );
 
-    if (isRandom) {
-      dispatch(playNextSong());
-    } else {
-      const currentIndex = queue.findIndex(
-        (s) => s.songId === currentSong.songId
-      );
+    // Debug log để kiểm tra giá trị currentSong
+    console.log("Current song before fetch:", {
+      currentSong,
+      songId: currentSong?.songId,
+    });
 
-      if (currentIndex < queue.length - 1 || repeatMode === 2) {
-        // Phát bài tiếp theo hoặc lặp lại queue
+    if (currentIndex === queue.length - 1 || queue.length === 0) {
+      console.log("Queue ended, fetching random song...");
+
+      if (repeatMode === 2) {
         dispatch(playNextSong());
       } else {
-        // Hết queue và không lặp
-        dispatch(togglePlay(false));
+        try {
+          // Kiểm tra currentSong tồn tại trước khi truy cập songId
+          const excludeSongId = currentSong?.songId || undefined;
+
+          // Clear queue cũ
+          dispatch(clearQueue());
+
+          // Log để debug
+          console.log("Fetching random song with exclude id:", excludeSongId);
+
+          // Fetch random song với proper error handling
+          const result = await dispatch(
+            fetchRandomSong(excludeSongId)
+          ).unwrap();
+
+          if (result) {
+            console.log("Random song received:", result);
+            dispatch(setQueue([result]));
+            dispatch(setCurrentSong(result));
+            dispatch(togglePlay(true));
+          } else {
+            console.error("Received empty result from random song fetch");
+          }
+        } catch (error) {
+          console.error("Error fetching random song:", error);
+        }
       }
+    } else {
+      dispatch(playNextSong());
     }
   };
 
@@ -205,7 +262,12 @@ const BottomPlayer = () => {
           <button
             className="control-btn"
             onClick={handlePreviousSong}
-            disabled={!currentSong || queue.length === 0}
+            disabled={
+              !currentSong ||
+              queue.length === 0 ||
+              (queue.findIndex((s) => s.songId === currentSong.songId) === 0 &&
+                repeatMode !== 2)
+            }
           >
             <FaStepBackward />
           </button>
@@ -219,7 +281,13 @@ const BottomPlayer = () => {
           <button
             className="control-btn"
             onClick={handleNextSong}
-            disabled={!currentSong || queue.length === 0}
+            disabled={
+              !currentSong ||
+              queue.length === 0 ||
+              (queue.findIndex((s) => s.songId === currentSong.songId) ===
+                queue.length - 1 &&
+                repeatMode !== 2)
+            }
           >
             <FaStepForward />
           </button>
