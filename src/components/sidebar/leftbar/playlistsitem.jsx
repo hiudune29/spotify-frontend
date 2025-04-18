@@ -6,7 +6,6 @@ import {
   deletePlaylist,
   fetchPlaylistsByUserId,
 } from "../../../redux/slice/playlistSlice";
-import { setActiveView } from "../../../redux/slice/uiSlice";
 import { Heart, Play, Trash2 } from "lucide-react";
 import { setShowPlaylist } from "../../../redux/slice/searchSlice"; // Thêm import này
 
