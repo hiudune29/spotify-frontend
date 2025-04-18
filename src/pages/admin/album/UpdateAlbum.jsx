@@ -32,20 +32,20 @@ const UpdateAlbum = () => {
 
   const { content: artistItems = [] } = useSelector(selectItemsArtist);
   const { content: albums = [] } = useSelector(selectItemsAlbum); // list album để chọn
-  const albumDetail = useSelector(selectAlbum); // chi tiết album
 
   useEffect(() => {
     dispatch(fetchArtistsSelect());
     dispatch(fetchAlbumsSelect());
   }, [dispatch]);
-
+  const albumDetail = useSelector(selectAlbum); // chi tiết album
   useEffect(() => {
     if (albumDetail) {
+      console.log(albumDetail.artist?.artistId);
       form.setFieldsValue({
         albumId: albumDetail.albumId,
         title: albumDetail.title,
         releaseDate: dayjs(albumDetail.releaseDate),
-        artist: albumDetail.artistId,
+        artist: albumDetail.artist?.artistId,
         type: albumDetail.type,
         image: albumDetail.coverImage
           ? [

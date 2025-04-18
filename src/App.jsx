@@ -11,9 +11,10 @@ import LoginPage from "./pages/auth/login";
 import SignUpPage from "./pages/auth/signup";
 import AdminLayout from "./components/admin/layoutAdmin";
 import Dashboard from "./pages/admin/Dashboard";
-import Song from "./pages/admin/Song";
+import Song from "./pages/admin/song/Song";
 import Album from "./pages/admin/album/Album";
 import Artist from "./pages/admin/artist/Artist";
+import Playlist from "./pages/admin/playlist/Playlist";
 import CreateAlbum from "./pages/admin/album/CreateAlbum";
 import UpdateAlbum from "./pages/admin/album/UpdateAlbum";
 import CreateArtist from "./pages/admin/artist/CreateArtist";
@@ -56,8 +57,8 @@ function App() {
           <Route path="album" element={<Album />} />
           <Route path="album/create" element={<CreateAlbum />} />
           <Route path="album/update" element={<UpdateAlbum />} />
-          {/* <Route path="playlists" element={<Playlists />} />
-          <Route path="users" element={<Users />} /> */}
+          <Route path="playlist" element={<Playlist />} />
+          {/* <Route path="users" element={<Users />} /> */}
         </Route>
       </Routes>
     </Router>
