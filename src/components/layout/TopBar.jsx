@@ -10,6 +10,7 @@ import {
   setSearchQuery,
   clearSearchQuery,
   setShowUserProfile,
+  setShowPlaylist,
 } from "../../redux/slice/searchSlice";
 import { Home, Search } from "lucide-react";
 import "./TopBar.css";
@@ -24,6 +25,7 @@ const LeftIconGroup = () => {
     dispatch(togglePlaylistContent(false));
     dispatch(clearSearchQuery());
     dispatch(setShowUserProfile(false));
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
   };
 
   return (
@@ -59,11 +61,13 @@ const CenterSection = () => {
     dispatch(resetPlaylistState());
     dispatch(clearSearchQuery());
     dispatch(setShowUserProfile(false));
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
   };
 
   const handleSearchChange = (e) => {
     dispatch(setSearchQuery(e.target.value));
-    dispatch(setShowUserProfile(false)); // Ẩn UserProfile khi bắt đầu tìm kiếm
+    dispatch(setShowUserProfile(false));
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
   };
 
   const handleSearchFocus = () => {
@@ -119,6 +123,7 @@ const RightIconGroup = () => {
   const handleProfileClick = () => {
     dispatch(setShowUserProfile(true));
     dispatch(clearSearchQuery());
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
     setIsMenuOpen(false);
   };
 

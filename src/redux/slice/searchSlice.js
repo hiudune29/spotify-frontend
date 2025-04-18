@@ -1,18 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// ✅ Async thunk để fetch kết quả tìm kiếm từ backend
 export const fetchSearchResults = createAsyncThunk(
   "search/fetchSearchResults",
   async (keyword, { rejectWithValue }) => {
     try {
-      // Sử dụng GET với params để gửi keyword qua query parameter
       const response = await axios.get("http://localhost:8080/api/search", {
         params: {
-          keyword: keyword, // Truyền keyword qua params
+          keyword: keyword,
         },
       });
-      return response.data.result; // result bên trong ApiResponse<searchResponse>
+      return response.data.result;
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Something went wrong"
@@ -29,6 +27,8 @@ const searchSlice = createSlice({
     searchResults: null,
     loading: false,
     error: null,
+    showPlaylist: false,
+    selectedPlaylist: null,
   },
   reducers: {
     setSearchQuery: (state, action) => {
@@ -41,6 +41,10 @@ const searchSlice = createSlice({
     },
     setShowUserProfile: (state, action) => {
       state.showUserProfile = action.payload;
+    },
+    setShowPlaylist: (state, action) => {
+      state.showPlaylist = action.payload.show;
+      state.selectedPlaylist = action.payload.playlist || null;
     },
   },
   extraReducers: (builder) => {
@@ -60,9 +64,11 @@ const searchSlice = createSlice({
   },
 });
 
-// ✅ Export action creators
-export const { setSearchQuery, clearSearchQuery, setShowUserProfile } =
-  searchSlice.actions;
+export const {
+  setSearchQuery,
+  clearSearchQuery,
+  setShowUserProfile,
+  setShowPlaylist,
+} = searchSlice.actions;
 
-// ✅ Export reducer
 export default searchSlice.reducer;

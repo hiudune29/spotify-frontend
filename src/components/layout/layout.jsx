@@ -19,7 +19,8 @@ const Layout = () => {
   const { showPlaylistContent, selectedSong, currentPlaylist } = useSelector(
     (state) => state.playlists
   );
-  const { searchQuery, showUserProfile } = useSelector((state) => state.search);
+  const { searchQuery, showUserProfile, showPlaylist, selectedPlaylist } =
+    useSelector((state) => state.search);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -43,20 +44,16 @@ const Layout = () => {
     navigate("/login");
   };
 
-  if (loading) {
-    return <p className="text-white text-center">Đang tải...</p>;
-  }
-
-  if (!userInfo) {
-    return null;
-  }
-
   const renderContent = () => {
-    // Ưu tiên hiển thị Result_Searched nếu có searchQuery
+    // Ưu tiên hiển thị PlaylistContent nếu showPlaylist
+    if (showPlaylist && selectedPlaylist) {
+      return <PlaylistContent type="playlist" />;
+    }
+    // Hiển thị Result_Searched nếu có searchQuery
     if (searchQuery) {
       return <Result_Searched />;
     }
-    // Sau đó mới kiểm tra showUserProfile
+    // Hiển thị UserProfile nếu showUserProfile
     if (showUserProfile) {
       return <UserProfile />;
     }
@@ -69,6 +66,14 @@ const Layout = () => {
     }
     return <ContentPlaylist />;
   };
+
+  if (loading) {
+    return <p className="text-white text-center">Đang tải...</p>;
+  }
+
+  if (!userInfo) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">

@@ -10,7 +10,6 @@ const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const dispatch = useDispatch();
 
-  // Fake userId hoặc lấy từ Redux/Auth sau
   const userId = useSelector((state) => state.user.userId);
 
   useEffect(() => {
@@ -34,7 +33,7 @@ const Sidebar = () => {
     creator: playlist.user.fullName,
     coverUrl: playlist.coverImage || "/placeholder.svg",
     addedDate: playlist.createAt?.slice(0, 10) || "",
-    lastPlayed: "", // nếu muốn, có thể dùng thư viện date-fns để xử lý thời gian
+    lastPlayed: "",
   }));
 
   return (
