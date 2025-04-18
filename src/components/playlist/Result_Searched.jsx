@@ -146,6 +146,13 @@ const ArtistCard = ({ artist, onClick }) => {
 const AlbumCard = ({ album, onClick }) => {
   const dispatch = useDispatch();
 
+  // Log để debug dữ liệu album
+  console.log("Album data in AlbumCard:", album);
+
+  // Lấy dữ liệu album đúng cách
+  const albumInfo = album?.album || {};
+  const songs = album?.songs || [];
+
   const handlePlay = (e) => {
     e.stopPropagation();
     if (album.songs && album.songs.length > 0) {
@@ -161,24 +168,11 @@ const AlbumCard = ({ album, onClick }) => {
   };
 
   const handleAlbumClick = () => {
-    // Prepare album data in the format expected by PlaylistContent
     const formattedAlbum = {
       type: "album",
-      songs: album.songs || [],
-      album: {
-        albumId: album.albumId,
-        title: album.title,
-        description: album.description || "",
-        coverImage: album.coverImage,
-        artist: album.artist,
-        releaseDate: album.releaseDate,
-        createdAt: album.createdAt,
-        status: album.status,
-        type: album.type,
-      },
+      songs: songs,
+      album: albumInfo,
     };
-
-    console.log("Formatted Album Data:", formattedAlbum);
     onClick("album", formattedAlbum);
   };
 
@@ -189,8 +183,8 @@ const AlbumCard = ({ album, onClick }) => {
     >
       <div className="relative">
         <img
-          src={album.coverImage || "https://via.placeholder.com/180"}
-          alt={album.title || "Album"}
+          src={albumInfo.coverImage || "https://via.placeholder.com/180"}
+          alt={albumInfo.title || "Album"}
           className="w-[180px] h-[180px] object-cover rounded-md"
         />
         <button
@@ -208,10 +202,10 @@ const AlbumCard = ({ album, onClick }) => {
         </button>
       </div>
       <h3 className="mt-2 text-sm font-medium text-white leading-tight">
-        {album.title || "Unknown Album"}
+        {albumInfo.title || "Unknown Album"}
       </h3>
       <p className="mt-1 text-xs font-normal text-gray-400 truncate">
-        {album.artist?.name || "Unknown Artist"}
+        {albumInfo.artist?.name || "Unknown Artist"}
       </p>
     </div>
   );
