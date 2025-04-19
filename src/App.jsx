@@ -22,6 +22,7 @@ import UpdateAlbum from "./pages/admin/album/UpdateAlbum";
 import CreateArtist from "./pages/admin/artist/CreateArtist";
 import UpdateArtist from "./pages/admin/artist/UpdateArtist";
 import CreatePlaylist from "./pages/admin/playlist/CreatePlaylist";
+import UpdatePlaylist from "./pages/admin/playlist/UpdatePlaylist";
 // Component bảo vệ route cho admin
 const ProtectedAdminRoute = ({ children }) => {
   const { role } = useSelector((state) => state.user);
@@ -64,6 +65,7 @@ function App() {
           <Route path="album/update" element={<UpdateAlbum />} />
           <Route path="playlist" element={<Playlist />} />
           <Route path="playlist/create" element={<CreatePlaylist />} />
+          <Route path="playlist/update" element={<UpdatePlaylist />} />
           {/* <Route path="users" element={<Users />} /> */}
         </Route>
       </Routes>
