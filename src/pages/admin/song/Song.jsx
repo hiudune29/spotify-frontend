@@ -46,15 +46,13 @@ const Songs = () => {
     },
     {
       title: "Album",
-      dataIndex: "albumTitle",
-      key: "albumTitle",
-      ellipsis: true,
+      dataIndex: "title",
+      key: "title",
     },
     {
       title: "Nghệ sĩ sở hữu",
       dataIndex: "artistName",
       key: "artistName",
-      ellipsis: true,
     },
     {
       title: "Thời lượng",
@@ -65,13 +63,11 @@ const Songs = () => {
         const seconds = duration % 60;
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
       },
-      ellipsis: true,
     },
     {
       title: "File",
       dataIndex: "fileUpload",
       key: "fileUpload",
-      ellipsis: true,
     },
     {
       title: "Nghệ sĩ tham gia",
@@ -99,6 +95,13 @@ const Songs = () => {
           style={{ width: 40, height: 40, objectFit: "cover" }}
         />
       ),
+    },
+    {
+      title: "Ngày khởi tạo",
+      dataIndex: "createdAt", // Cập nhật tên cột
+      key: "createdAt",
+      sorter: (a, b) => a.createdAt - b.createdAt,
+      sortOrder: sortedInfo.columnKey === "createdAt" ? sortedInfo.order : null,
     },
     {
       title: "Trạng thái",

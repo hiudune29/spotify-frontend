@@ -1,24 +1,26 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Fetch danh sách user dùng cho select (status = true)
 export const fetchUsersSelect = createAsyncThunk(
-  "songAdmin/fetchUsersSelect",
-  async (thunkAPI) => {
+  "userAdmin/fetchUsersSelect",
+  async (_, thunkAPI) => {
     try {
-      const res = await axios.get(
-        "http://localhost:8080/api/user/status",
-        {
-          params: {
-            status: true,
-          },
+      const res = await axios.get("http://localhost:8080/api/user/status", {
+        params: {
+          status: true,
+          pageNo: 0,
+          pageSize: 100, // hoặc số tùy chọn
+          sortBy: "userName",
+          sortDir: "asc",
         },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      console.log("Response from fetchUsersSelect:", res.data); // Debug response
+      // Trả về content nằm trong result
+      return res.data.result.content; // ⬅️ lấy mảng user từ page
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Fetch failed"
@@ -34,8 +36,8 @@ const userAdminSlice = createSlice({
     userSelected: {},
   },
   reducers: {
-    resetSongSelected: (state) => {
-      state.songSelected = {};
+    resetUserSelected: (state) => {
+      state.userSelected = {};
     },
   },
   extraReducers: (builder) => {
@@ -45,7 +47,10 @@ const userAdminSlice = createSlice({
   },
 });
 
-export const { resetSongSelected } = userAdminSlice.actions;
+export const { resetUserSelected } = userAdminSlice.actions;
 export default userAdminSlice.reducer;
-export const selectItemsUserAdmin = (state) => state.userAdmin.items;
-export const selectUserAdminSelected = (state) => state.userAdmin.userSelected;
+
+// Selectors
+export const selectItemsUserAdmin = (state) => state.userAdmin.items || [];
+export const selectUserAdminSelected = (state) =>
+  state.userAdmin.userSelected || {};
