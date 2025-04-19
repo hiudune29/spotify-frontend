@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux"; // Thêm useSelector
+import { useDispatch, useSelector } from "react-redux";
 import {
   togglePlaylistContent,
   clearSelectedSong,
   resetPlaylistState,
 } from "../../redux/slice/playlistSlice";
+import {
+  setSearchQuery,
+  clearSearchQuery,
+  setShowUserProfile,
+  setShowPlaylist,
+} from "../../redux/slice/searchSlice";
 import { Home, Search } from "lucide-react";
 import "./TopBar.css";
-import avatar from "../../assets/avatar.png";
 
 // Left Icon Group Component
 const LeftIconGroup = () => {
@@ -18,6 +23,9 @@ const LeftIconGroup = () => {
   const handleSpotifyClick = () => {
     navigate("/");
     dispatch(togglePlaylistContent(false));
+    dispatch(clearSearchQuery());
+    dispatch(setShowUserProfile(false));
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
   };
 
   return (
@@ -33,36 +41,35 @@ const LeftIconGroup = () => {
 
 // Center Section Component (Home + Search Bar)
 const CenterSection = () => {
-  const [searchQuery, setSearchQuery] = useState("What do you want to play?");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // Lấy trạng thái xem có đang xem bài hát đơn lẻ hay không
   const { selectedSong } = useSelector((state) => state.playlists);
+  const { searchQuery } = useSelector((state) => state.search);
 
   const goToHome = () => {
     if (location.pathname !== "/") {
       navigate("/");
     }
-    // Reset toàn bộ state
     dispatch(resetPlaylistState());
+    dispatch(clearSearchQuery());
+    dispatch(setShowUserProfile(false));
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value || "What do you want to play?");
+    dispatch(setSearchQuery(e.target.value));
+    dispatch(setShowUserProfile(false));
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
   };
 
   const handleSearchFocus = () => {
-    if (searchQuery === "What do you want to play?") {
-      setSearchQuery("");
-    }
+    setIsSearchFocused(true);
   };
 
   const handleSearchBlur = () => {
-    if (!searchQuery) {
-      setSearchQuery("What do you want to play?");
-    }
+    setIsSearchFocused(false);
   };
 
   return (
@@ -73,13 +80,14 @@ const CenterSection = () => {
       >
         <Home size={20} />
       </button>
-      <div className="search-container">
+      <div className={`search-container ${isSearchFocused ? "focused" : ""}`}>
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
           onFocus={handleSearchFocus}
           onBlur={handleSearchBlur}
+          placeholder="What do you want to play?"
           className="search-input"
         />
         <button className="search-icon">
@@ -94,23 +102,39 @@ const CenterSection = () => {
 const RightIconGroup = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.user);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
+  const handleProfileClick = () => {
+    dispatch(setShowUserProfile(true));
+    dispatch(clearSearchQuery());
+    dispatch(setShowPlaylist({ show: false, playlist: null })); // Reset playlist
+    setIsMenuOpen(false);
+  };
+
   return (
     <div className="right-icons">
       <button className="profile-icon" onClick={toggleMenu}>
-        <img src={avatar} alt="Profile" className="avatar" />
+        <img
+          src={userInfo?.avatar || "https://i.pravatar.cc/300"}
+          alt="Profile"
+          className="avatar"
+        />
       </button>
       {isMenuOpen && (
         <div className="menu">
-          <div className="menu-item">Account</div>
-          <div className="menu-item">Profile</div>
+          <div className="menu-item" onClick={handleProfileClick}>
+            Profile
+          </div>
           <div className="menu-item" onClick={handleLogout}>
             Log out
           </div>

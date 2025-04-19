@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const token = localStorage.getItem("token");
-// Create
+
 export const createPlaylist = createAsyncThunk(
   "playlists/create",
   async (playlistData, thunkAPI) => {
@@ -23,7 +23,6 @@ export const createPlaylist = createAsyncThunk(
   }
 );
 
-// Update
 export const updatePlaylist = createAsyncThunk(
   "playlists/update",
   async ({ id, playlistData, avatarFile }, thunkAPI) => {
@@ -46,7 +45,6 @@ export const updatePlaylist = createAsyncThunk(
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -59,13 +57,12 @@ export const updatePlaylist = createAsyncThunk(
   }
 );
 
-// Delete
 export const deletePlaylist = createAsyncThunk(
   "playlists/delete",
   async (id, thunkAPI) => {
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/playlists/delete/${id}`,
+        `http://localhost:8080/api/playlists/disable/${id}`,
         {},
         {
           headers: {
@@ -80,7 +77,6 @@ export const deletePlaylist = createAsyncThunk(
   }
 );
 
-// Fetch playlists by userId
 export const fetchPlaylistsByUserId = createAsyncThunk(
   "playlists/fetchByUserId",
   async (userId, thunkAPI) => {
@@ -100,7 +96,6 @@ export const fetchPlaylistsByUserId = createAsyncThunk(
   }
 );
 
-// Fetch all songs
 export const fetchSongs = createAsyncThunk(
   "playlists/fetchSongs",
   async (_, thunkAPI) => {
@@ -120,7 +115,6 @@ export const fetchSongs = createAsyncThunk(
   }
 );
 
-// Fetch songs of a playlist
 export const fetchPlaylistSongs = createAsyncThunk(
   "playlist/fetchPlaylistSongs",
   async (playlistId, thunkAPI) => {
@@ -139,17 +133,56 @@ export const fetchPlaylistSongs = createAsyncThunk(
     }
   }
 );
+
+export const fetchRandomSong = createAsyncThunk(
+  "playlists/fetchRandomSong",
+  async (excludeSongId, { rejectWithValue }) => {
+    try {
+      // Log để debug
+      console.log("Calling random API with excludeSongId:", excludeSongId);
+
+      // Xây dựng URL với điều kiện
+      const url = excludeSongId
+        ? `http://localhost:8080/api/songs/random?exclude=${excludeSongId}`
+        : `http://localhost:8080/api/songs/random`;
+
+      console.log("API URL:", url);
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Log response để debug
+      console.log("API Response:", response.data);
+
+      if (!response.data.result) {
+        throw new Error("No song received from API");
+      }
+
+      return response.data.result;
+    } catch (error) {
+      console.error("Error in fetchRandomSong:", error);
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const initialState = {
-  // Các state đang được sử dụng:
-  items: [], // Dùng cho danh sách playlist trong sidebar
-  currentSong: null, // Bài hát đang phát
-  currentPlaylist: null, // Playlist đang được hiển thị/phát
-  currentSongIndex: 0, // Vị trí bài hát trong playlist
-  currentPlayingSongId: null, // ID của bài hát đang phát
-  selectedSong: null, // Bài hát được chọn để xem chi tiết
-  showPlaylistContent: false, // Toggle hiển thị playlist
-  loading: false, // Trạng thái loading
-  error: null, // Thông tin lỗi
+  items: [],
+  songs: [],
+  isRandom: false,
+  currentSong: null,
+  currentPlaylist: null,
+  currentSongIndex: 0,
+  currentPlayingSongId: null,
+  selectedSong: null,
+  queue: [],
+  showPlaylistContent: false,
+  loading: false,
+  error: null,
+  repeatMode: 0,
 };
 
 const playlistSlice = createSlice({
@@ -169,42 +202,56 @@ const playlistSlice = createSlice({
     },
     setCurrentPlaylist: (state, action) => {
       state.currentPlaylist = action.payload;
-      // Nếu playlist không rỗng, set currentSong là bài đầu tiên
-      if (action.payload.length > 0) {
-        state.currentSong = action.payload[0];
+      if (action.payload.songs?.length > 0) {
+        state.queue = action.payload.songs;
+        state.currentSong = action.payload.songs[0];
+        state.currentSongIndex = 0;
+        state.currentPlayingSongId = action.payload.songs[0].songId;
       }
     },
     togglePlaylistContent: (state, action) => {
       state.showPlaylistContent = action.payload;
       if (action.payload) {
-        // When showing playlist content, clear selected song
         state.selectedSong = null;
       }
     },
     playNextSong: (state) => {
-      if (!state.currentPlaylist.songs.length) return;
-
-      const nextIndex = state.isRandom
-        ? Math.floor(Math.random() * state.currentPlaylist.songs.length)
-        : (state.currentSongIndex + 1) % state.currentPlaylist.songs.length;
-
+      if (!state.queue.length) return;
+      let nextIndex;
+      if (state.isRandom) {
+        do {
+          nextIndex = Math.floor(Math.random() * state.queue.length);
+        } while (
+          nextIndex === state.currentSongIndex &&
+          state.queue.length > 1
+        );
+      } else {
+        nextIndex = (state.currentSongIndex + 1) % state.queue.length;
+      }
+      const nextSong = state.queue[nextIndex];
       state.currentSongIndex = nextIndex;
-      const nextSong = state.currentPlaylist.songs[nextIndex];
       state.currentSong = nextSong;
       state.currentPlayingSongId = nextSong.songId;
       state.isPlaying = true;
     },
     playPreviousSong: (state) => {
-      if (!state.currentPlaylist.songs.length) return;
-
-      const prevIndex = state.isRandom
-        ? Math.floor(Math.random() * state.currentPlaylist.songs.length)
-        : state.currentSongIndex - 1 < 0
-        ? state.currentPlaylist.songs.length - 1
-        : state.currentSongIndex - 1;
-
+      if (!state.queue.length) return;
+      let prevIndex;
+      if (state.isRandom) {
+        do {
+          prevIndex = Math.floor(Math.random() * state.queue.length);
+        } while (
+          prevIndex === state.currentSongIndex &&
+          state.queue.length > 1
+        );
+      } else {
+        prevIndex =
+          state.currentSongIndex - 1 < 0
+            ? state.queue.length - 1
+            : state.currentSongIndex - 1;
+      }
+      const prevSong = state.queue[prevIndex];
       state.currentSongIndex = prevIndex;
-      const prevSong = state.currentPlaylist.songs[prevIndex];
       state.currentSong = prevSong;
       state.currentPlayingSongId = prevSong.songId;
       state.isPlaying = true;
@@ -217,6 +264,9 @@ const playlistSlice = createSlice({
         state.currentPlayingSongId = song.songId;
       }
     },
+    toggleRandom: (state) => {
+      state.isRandom = !state.isRandom;
+    },
     togglePlay: (state, action) => {
       state.isPlaying = action.payload;
     },
@@ -225,77 +275,78 @@ const playlistSlice = createSlice({
       state.selectedSong = null;
       state.showPlaylistContent = false;
     },
+    setQueue: (state, action) => {
+      state.queue = action.payload;
+      if (!state.currentSong && action.payload.length > 0) {
+        state.currentSong = action.payload[0];
+        state.currentSongIndex = 0;
+        state.currentPlayingSongId = action.payload[0].songId;
+      }
+    },
+    clearQueue: (state) => {
+      state.queue = [];
+      state.currentSong = null;
+      state.currentSongIndex = 0;
+      state.currentPlayingSongId = null;
+      state.isPlaying = false;
+    },
+    setRepeatMode: (state, action) => {
+      state.repeatMode = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchPlaylistsByUserId.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(fetchPlaylistsByUserId.fulfilled, (state, action) => {
         state.items = action.payload;
         state.loading = false;
+      })
+      .addCase(fetchPlaylistsByUserId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchPlaylistsByUserId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(fetchSongs.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(fetchSongs.fulfilled, (state, action) => {
         state.songs = action.payload;
         state.loading = false;
+      })
+      .addCase(fetchSongs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchSongs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(fetchPlaylistSongs.fulfilled, (state, action) => {
+        state.currentPlaylist = action.payload;
+        if (action.payload.songs?.length > 0) {
+          state.queue = action.payload.songs;
+          if (!state.currentSong) {
+            state.currentSong = action.payload.songs[0];
+            state.currentSongIndex = 0;
+            state.currentPlayingSongId = action.payload.songs[0].songId;
+          }
+        }
+        state.loading = false;
+      })
       .addCase(fetchPlaylistSongs.pending, (state) => {
         state.loading = true;
         state.error = null;
-      })
-      .addCase(fetchPlaylistSongs.fulfilled, (state, action) => {
-        // Cập nhật trực tiếp currentPlaylist với dữ liệu từ API
-        state.currentPlaylist = action.payload;
-        state.loading = false;
       })
       .addCase(fetchPlaylistSongs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(createPlaylist.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createPlaylist.fulfilled, (state, action) => {
-        state.items = [...state.items, action.payload];
-        state.loading = false;
-      })
-      .addCase(createPlaylist.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(deletePlaylist.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deletePlaylist.fulfilled, (state, action) => {
-        // Remove the deleted playlist from items array
-        state.items = state.items.filter(
-          (playlist) => playlist.playlistId !== action.payload
-        );
-        // Reset current playlist if it was the one deleted
-        if (state.currentPlaylist?.playlist?.playlistId === action.payload) {
-          state.currentPlaylist = null;
-          state.showPlaylistContent = false;
+      .addCase(fetchRandomSong.fulfilled, (state, action) => {
+        state.queue.push(action.payload);
+        if (!state.currentSong) {
+          state.currentSong = action.payload;
+          state.currentSongIndex = state.queue.length - 1;
+          state.currentPlayingSongId = action.payload.songId;
         }
-        state.loading = false;
-      })
-      .addCase(deletePlaylist.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
       });
   },
 });
@@ -311,6 +362,10 @@ export const {
   setCurrentSongIndex,
   togglePlay,
   resetPlaylistState,
+  setQueue,
+  clearQueue,
+  toggleRandom,
+  setRepeatMode,
 } = playlistSlice.actions;
 
 export default playlistSlice.reducer;
