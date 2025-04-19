@@ -219,6 +219,7 @@ const playlistSlice = createSlice({
       if (!state.queue.length) return;
       let nextIndex;
       if (state.isRandom) {
+        // Chỉ random trong phạm vi queue hiện tại
         do {
           nextIndex = Math.floor(Math.random() * state.queue.length);
         } while (
@@ -238,6 +239,7 @@ const playlistSlice = createSlice({
       if (!state.queue.length) return;
       let prevIndex;
       if (state.isRandom) {
+        // Chỉ random trong phạm vi queue hiện tại
         do {
           prevIndex = Math.floor(Math.random() * state.queue.length);
         } while (
@@ -278,9 +280,15 @@ const playlistSlice = createSlice({
     setQueue: (state, action) => {
       state.queue = action.payload;
       if (!state.currentSong && action.payload.length > 0) {
-        state.currentSong = action.payload[0];
-        state.currentSongIndex = 0;
-        state.currentPlayingSongId = action.payload[0].songId;
+        if (state.isRandom) {
+          const randomIndex = Math.floor(Math.random() * action.payload.length);
+          state.currentSong = action.payload[randomIndex];
+          state.currentSongIndex = randomIndex;
+        } else {
+          state.currentSong = action.payload[0];
+          state.currentSongIndex = 0;
+        }
+        state.currentPlayingSongId = state.currentSong.songId;
       }
     },
     clearQueue: (state) => {
@@ -323,11 +331,23 @@ const playlistSlice = createSlice({
       .addCase(fetchPlaylistSongs.fulfilled, (state, action) => {
         state.currentPlaylist = action.payload;
         if (action.payload.songs?.length > 0) {
+          // Clear queue trước khi set queue mới
+          state.queue = [];
           state.queue = action.payload.songs;
+
+          // Nếu chưa có bài hát nào đang phát, set bài hát đầu tiên
           if (!state.currentSong) {
-            state.currentSong = action.payload.songs[0];
-            state.currentSongIndex = 0;
-            state.currentPlayingSongId = action.payload.songs[0].songId;
+            if (state.isRandom) {
+              const randomIndex = Math.floor(
+                Math.random() * action.payload.songs.length
+              );
+              state.currentSong = action.payload.songs[randomIndex];
+              state.currentSongIndex = randomIndex;
+            } else {
+              state.currentSong = action.payload.songs[0];
+              state.currentSongIndex = 0;
+            }
+            state.currentPlayingSongId = state.currentSong.songId;
           }
         }
         state.loading = false;

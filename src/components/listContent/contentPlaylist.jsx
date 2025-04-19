@@ -7,6 +7,8 @@ import {
   setSelectedSong,
   setQueue,
   togglePlay,
+  clearQueue,
+  toggleRandom,
 } from "../../redux/slice/playlistSlice";
 import PlaylistContent from "../playlist/playlistcontent";
 import "../../style/contentPlaylist.css";
@@ -16,17 +18,14 @@ const CardSong = ({ song, onSongClick }) => {
 
   // Sửa lại hàm xử lý khi nhấn nút play
   const handlePlay = (e) => {
-    e.stopPropagation(); // Ngăn không cho sự kiện click bubble lên div cha
+    e.stopPropagation();
 
-    // Tạo queue mới chỉ với bài hát hiện tại
-    const newQueue = [song];
-
-    // Set queue mới
-    dispatch(setQueue(newQueue));
-    // Set bài hát hiện tại
+    // Xóa queue cũ và tạo queue mới chỉ với bài hát được chọn
+    dispatch(clearQueue());
+    dispatch(setQueue([song]));
     dispatch(setCurrentSong(song));
-    // Đảm bảo phát nhạc
     dispatch(togglePlay(true));
+    // Không cần bật random mode nữa
   };
 
   return (

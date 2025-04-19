@@ -145,24 +145,21 @@ const ArtistCard = ({ artist, onClick }) => {
 // Component: AlbumCard
 const AlbumCard = ({ album, onClick }) => {
   const dispatch = useDispatch();
-
-  // Log để debug dữ liệu album
-  console.log("Album data in AlbumCard:", album);
-
-  // Lấy dữ liệu album đúng cách
-  const albumInfo = album?.album || {};
-  const songs = album?.songs || [];
+  const { isRandom } = useSelector((state) => state.playlists);
 
   const handlePlay = (e) => {
     e.stopPropagation();
     if (album.songs && album.songs.length > 0) {
-      // Clear existing queue
       dispatch(clearQueue());
-      // Set new queue with album songs
-      dispatch(setQueue(album.songs));
-      // Set first song as current
-      dispatch(setCurrentSong(album.songs[0]));
-      // Start playing
+      const newQueue = [...album.songs];
+      dispatch(setQueue(newQueue));
+
+      if (isRandom) {
+        const randomIndex = Math.floor(Math.random() * newQueue.length);
+        dispatch(setCurrentSong(newQueue[randomIndex]));
+      } else {
+        dispatch(setCurrentSong(newQueue[0]));
+      }
       dispatch(togglePlay(true));
     }
   };
@@ -170,8 +167,8 @@ const AlbumCard = ({ album, onClick }) => {
   const handleAlbumClick = () => {
     const formattedAlbum = {
       type: "album",
-      songs: songs,
-      album: albumInfo,
+      songs: album.songs || [],
+      album: album.album,
     };
     onClick("album", formattedAlbum);
   };
@@ -183,8 +180,8 @@ const AlbumCard = ({ album, onClick }) => {
     >
       <div className="relative">
         <img
-          src={albumInfo.coverImage || "https://via.placeholder.com/180"}
-          alt={albumInfo.title || "Album"}
+          src={album.album?.coverImage || "https://via.placeholder.com/180"}
+          alt={album.album?.name || "Album"}
           className="w-[180px] h-[180px] object-cover rounded-md"
         />
         <button
@@ -202,10 +199,10 @@ const AlbumCard = ({ album, onClick }) => {
         </button>
       </div>
       <h3 className="mt-2 text-sm font-medium text-white leading-tight">
-        {albumInfo.title || "Unknown Album"}
+        {album.album?.name || "Unknown Album"}
       </h3>
       <p className="mt-1 text-xs font-normal text-gray-400 truncate">
-        {albumInfo.artist?.name || "Unknown Artist"}
+        {album.album?.artist?.name || "Unknown Artist"}
       </p>
     </div>
   );

@@ -8,13 +8,19 @@ import {
   setQueue,
   togglePlay,
   setCurrentSong,
+  clearQueue,
 } from "../../redux/slice/playlistSlice";
 
 const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
   const dispatch = useDispatch();
 
-  const { currentPlaylist, currentPlayingSongId, isPlaying, loading } =
-    useSelector((state) => state.playlists);
+  const {
+    currentPlaylist,
+    currentPlayingSongId,
+    isPlaying,
+    loading,
+    isRandom,
+  } = useSelector((state) => state.playlists);
   const { showPlaylist, selectedPlaylist } = useSelector(
     (state) => state.search
   );
@@ -33,28 +39,39 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
 
   const handlePlay = () => {
     if (type === "song" && singleSong) {
-      // Nếu bài hát đang phát là single song này
+      // Xử lý cho single song
       if (currentPlayingSongId === singleSong.songId) {
         dispatch(togglePlay(!isPlaying));
       } else {
-        // Nếu là bài khác, set queue mới và phát
+        dispatch(clearQueue());
         dispatch(setQueue([singleSong]));
         dispatch(setCurrentSong(singleSong));
         dispatch(togglePlay(true));
       }
     } else if (playlistData?.songs?.length > 0) {
-      // Kiểm tra xem có bài hát nào đang phát từ playlist này không
+      // Xử lý cho playlist
+      console.log("Playing playlist with songs:", playlistData.songs); // Debug log
+
       const isPlayingFromThisPlaylist = playlistData.songs.some(
         (song) => song.songId === currentPlayingSongId
       );
 
-      if (isPlayingFromThisPlaylist) {
+      if (isPlayingFromThisPlaylist && currentPlayingSongId) {
         // Nếu đang phát từ playlist này thì toggle play/pause
         dispatch(togglePlay(!isPlaying));
       } else {
-        // Nếu chưa phát từ playlist này, set queue mới và phát từ đầu
-        dispatch(setQueue(playlistData.songs));
-        dispatch(setCurrentSong(playlistData.songs[0]));
+        // Nếu chưa phát hoặc đang phát playlist khác
+        dispatch(clearQueue()); // Clear queue cũ
+        const newQueue = [...playlistData.songs];
+        dispatch(setQueue(newQueue));
+
+        // Chọn bài hát để phát
+        if (isRandom) {
+          const randomIndex = Math.floor(Math.random() * newQueue.length);
+          dispatch(setCurrentSong(newQueue[randomIndex]));
+        } else {
+          dispatch(setCurrentSong(newQueue[0]));
+        }
         dispatch(togglePlay(true));
       }
     }
@@ -98,6 +115,7 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
                     (song) => song.songId === currentPlayingSongId
                   )
                 }
+                disabled={!playlistData.songs?.length}
               />
             </div>
             <Playlist
@@ -129,6 +147,7 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
                 isPlaying={
                   isPlaying && currentPlayingSongId === singleSong.songId
                 }
+                disabled={!singleSong}
               />
               <Ellipsis className="scale-110 text-gray-400 hover:text-white cursor-pointer" />
             </div>
@@ -174,6 +193,7 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
                   (song) => song.songId === currentPlayingSongId
                 )
               }
+              disabled={!playlistData?.songs?.length}
             />
             <Ellipsis className="scale-110 text-gray-400 hover:text-white cursor-pointer" />
           </div>
