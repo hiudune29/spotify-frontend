@@ -3,7 +3,10 @@ import React, { useState } from "react";
 import { Plus, ArrowRight } from "lucide-react";
 import { VscLibrary } from "react-icons/vsc";
 import { useDispatch, useSelector } from "react-redux";
-import { createPlaylist } from "../../../redux/slice/playlistSlice";
+import {
+  createPlaylist,
+  fetchPlaylistsByUserId,
+} from "../../../redux/slice/playlistSlice";
 import defaultCover from "../../../assets/default.png"; // Add this import
 
 const SidebarHeader = ({ onToggle, isExpanded }) => {
@@ -20,10 +23,12 @@ const SidebarHeader = ({ onToggle, isExpanded }) => {
         description: "Playlist của tôi",
         coverImage: defaultCover, // Using imported default cover image
         status: true,
-        userId: userId, // Should be dynamic based on logged in user
+        userId: userId,
       };
 
       await dispatch(createPlaylist(newPlaylistData)).unwrap();
+      // Fetch lại danh sách playlist sau khi tạo thành công
+      await dispatch(fetchPlaylistsByUserId(userId));
       // Optional: Show success notification
     } catch (error) {
       console.error("Failed to create playlist:", error);

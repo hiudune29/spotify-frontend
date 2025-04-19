@@ -79,8 +79,8 @@ export const createSong = createAsyncThunk(
             JSON.stringify({
               songName: songData.songName,
               releaseDate: songData.releaseDate,
-              artistId: songData.artistId,
-              albumId: songData.albumId,
+              artist_id: songData.artistId,
+              album_id: songData.albumId,
               duration: songData.duration,
               featuredArtistIds: songData.featuredArtists,
             }),
@@ -101,7 +101,7 @@ export const createSong = createAsyncThunk(
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
