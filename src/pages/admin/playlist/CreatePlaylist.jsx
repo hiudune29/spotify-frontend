@@ -42,9 +42,11 @@ const CreatePlaylist = () => {
     : [];
 
   const onFinish = (values) => {
+    console.log(" dưqdwqdwqwdw", values.isPrivate);
+    console.log("values", values);
     const playlistData = {
       name: values.name,
-      user: values.user,
+      userId: values.user || null,
       songs: values.songs,
       description: values.description,
       isPrivate: values.isPrivate,
@@ -145,8 +147,13 @@ const CreatePlaylist = () => {
           </Upload>
         </Form.Item>
 
-        <Form.Item name="isPrivate" label="Private" valuePropName="checked">
-          <Checkbox></Checkbox>
+        <Form.Item
+          name="isPrivate"
+          label="Private"
+          valuePropName="checked"
+          initialValue={false} // <- cái này quan trọng
+        >
+          <Checkbox />
         </Form.Item>
 
         {/* Nút submit */}
