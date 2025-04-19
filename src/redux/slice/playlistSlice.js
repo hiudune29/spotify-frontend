@@ -169,6 +169,26 @@ export const fetchRandomSong = createAsyncThunk(
   }
 );
 
+export const togglePlaylistPrivate = createAsyncThunk(
+  "album/updateStatus",
+  async (playlistid, { rejectWithValue }) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:8080/api/playlists/private/${playlistid}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      return res.data.result;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
 const initialState = {
   items: [],
   songs: [],
@@ -367,6 +387,31 @@ const playlistSlice = createSlice({
           state.currentSongIndex = state.queue.length - 1;
           state.currentPlayingSongId = action.payload.songId;
         }
+      })
+      .addCase(togglePlaylistPrivate.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(togglePlaylistPrivate.fulfilled, (state, action) => {
+        state.loading = false;
+        // Cập nhật trong currentPlaylist nếu đang xem playlist đó
+        if (
+          state.currentPlaylist?.playlist?.playlistId ===
+          action.payload.playlistId
+        ) {
+          state.currentPlaylist.playlist = action.payload;
+        }
+        // Cập nhật trong danh sách items nếu có
+        const index = state.items.findIndex(
+          (item) => item.playlistId === action.payload.playlistId
+        );
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+      })
+      .addCase(togglePlaylistPrivate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
