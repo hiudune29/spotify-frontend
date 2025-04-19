@@ -18,9 +18,8 @@ export const fetchUsersSelect = createAsyncThunk(
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      console.log("Response from fetchUsersSelect:", res.data); // Debug response
       // Trả về content nằm trong result
-      return res.data.result.content; // ⬅️ lấy mảng user từ page
+      return res.data.result; // ⬅️ lấy mảng user từ page
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Fetch failed"

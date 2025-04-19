@@ -60,7 +60,7 @@ export const fetchPlaylistsAdmin = createAsyncThunk(
 // Fetch playlist by ID
 export const fetchPlaylistAdminById = createAsyncThunk(
   "playlistAdmin/fetchPlaylistAdminById",
-  async (playlistId, { rejectWithValue }) => {
+  async (playlistId, thunkAPI) => {
     try {
       const res = await axios.get(
         `http://localhost:8080/api/playlists/${playlistId}`,
@@ -71,13 +71,61 @@ export const fetchPlaylistAdminById = createAsyncThunk(
         }
       );
 
-      return res.data.result;
+      const playlist = res.data.result;
+
+      try {
+        const songsRes = await axios.get(
+          `http://localhost:8080/api/playlists/song/${playlist.playlistId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        playlist.songs = songsRes.data.result;
+      } catch (err) {
+        console.error(
+          "Failed to fetch songs for playlist",
+          playlist.playlistId,
+          err
+        );
+        playlist.songs = [];
+      }
+
+      return playlist;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Fetch failed");
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Fetch failed"
+      );
     }
   }
 );
 
+export const fetchPlaylistsSelect = createAsyncThunk(
+  "playlistAdmin/fetchPlaylistsSelect",
+  async (_, thunkAPI) => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/playlists/page", {
+        params: {
+          pageNo: 0,
+          pageSize: 1000,
+          sortBy: "name",
+          sortDir: "asc",
+          status: true,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      return res.data.result;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Fetch failed"
+      );
+    }
+  }
+);
 // Create new playlist
 export const createPlaylist = createAsyncThunk(
   "playlist/createPlaylist",
@@ -85,7 +133,7 @@ export const createPlaylist = createAsyncThunk(
     try {
       const formData = new FormData();
 
-      // Append playlist DTO
+      // Append playlistDto as application/json blob
       formData.append(
         "playlistDto",
         new Blob(
@@ -93,6 +141,7 @@ export const createPlaylist = createAsyncThunk(
             JSON.stringify({
               name: playlistData.name,
               userId: playlistData.userId,
+              playlistSongIds: playlistData.songs,
               description: playlistData.description,
               isPrivate: playlistData.isPrivate,
             }),
@@ -101,22 +150,14 @@ export const createPlaylist = createAsyncThunk(
         )
       );
 
-      // Append cover image if exists
+      // Append cover image
       if (playlistData.coverImage?.[0]?.originFileObj) {
         formData.append("coverImage", playlistData.coverImage[0].originFileObj);
       }
 
-      // Append playlistSongIds directly if exists
-      if (playlistData.songs?.length > 0) {
-        formData.append(
-          "playlistSongIds",
-          JSON.stringify(playlistData.songs) // Append as a JSON string
-        );
-      }
-
-      // Make the POST request
+      // Send request
       const res = await axios.post(
-        "http://localhost:8080/api/playlists/adminCreate", // Ensure the correct endpoint
+        "http://localhost:8080/api/playlists/adminCreate",
         formData,
         {
           headers: {
@@ -125,6 +166,8 @@ export const createPlaylist = createAsyncThunk(
           },
         }
       );
+      // Trả về kết quả
+      console.log("res", res.data);
       return res.data.result;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Create failed");
@@ -132,41 +175,74 @@ export const createPlaylist = createAsyncThunk(
   }
 );
 
+export const fetchSongsSelect = createAsyncThunk(
+  "songAdmin/fetchSongsSelect",
+  async (_, thunkAPI) => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/songs/pageAdmin", {
+        params: {
+          pageNo: 0,
+          pageSize: 1000,
+          sortBy: "songName",
+          sortDir: "asc",
+          status: true,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      return res.data.result;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Fetch failed"
+      );
+    }
+  }
+);
 // Update playlist
 export const updatePlaylist = createAsyncThunk(
-  "playlist/updatePlaylist",
+  "playlistAdmin/updatePlaylist",
   async (playlistData, { rejectWithValue }) => {
     try {
       const formData = new FormData();
+      // Append playlistDto as application/json blob
       formData.append(
-        "playlistDto",
+        "playlistUpdateDto",
         new Blob(
           [
             JSON.stringify({
               playlistId: playlistData.playlistId,
               name: playlistData.name,
+              userId: playlistData.userId,
+              playlistSongIds: playlistData.songs,
               description: playlistData.description,
               isPrivate: playlistData.isPrivate,
-              userId: playlistData.userId,
             }),
           ],
           { type: "application/json" }
         )
       );
+      // Append cover image
       if (playlistData.coverImage?.[0]?.originFileObj) {
         formData.append("coverImage", playlistData.coverImage[0].originFileObj);
       }
 
+      // Send request
       const res = await axios.put(
-        `http://localhost:8080/api/playlist/${playlistData.playlistId}`,
+        "http://localhost:8080/api/playlists/adminUpdate",
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
+      // Trả về kết quả
       return res.data.result;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Update failed");
+      return rejectWithValue(error.response?.data?.message || "Create failed");
     }
   }
 );
@@ -209,6 +285,9 @@ const playlistAdminSlice = createSlice({
       .addCase(fetchPlaylistAdminById.fulfilled, (state, action) => {
         state.playlistSelected = action.payload;
       })
+      .addCase(fetchPlaylistsSelect.fulfilled, (state, action) => {
+        state.items = action.payload;
+      })
       .addCase(togglePlaylistStatus.fulfilled, (state, action) => {
         const updated = action.payload;
 
@@ -220,8 +299,8 @@ const playlistAdminSlice = createSlice({
       });
   },
 });
-
-export const selectItemsPlaylist = (state) => state.playlist.items;
-export const selectPlaylist = (state) => state.playlist.playlistSelected;
+export const selectItemsPlaylistAdmin = (state) => state.playlistAdmin.items;
+export const selectPlaylistAdmin = (state) =>
+  state.playlistAdmin.playlistSelected;
 export default playlistAdminSlice.reducer;
 export const { resetPlaylistSelected } = playlistAdminSlice.actions;

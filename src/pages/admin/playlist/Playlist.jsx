@@ -4,7 +4,7 @@ import {
   fetchPlaylistsAdmin,
   togglePlaylistStatus,
 } from "../../../redux/slice/playlistAdminSlide"; // Giả sử bạn có action này
-import { Table, Button, Modal, Space, Card } from "antd";
+import { Button, Modal, Space, Card } from "antd";
 import AdminTable from "../../../components/admin/ui/Table"; // Giả sử bạn có component này
 
 const Playlist = () => {
