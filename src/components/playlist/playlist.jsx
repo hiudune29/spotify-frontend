@@ -75,10 +75,9 @@ const Playlist = ({
       <thead className="text-gray-400 text-sm font-semibold border-b border-gray-700">
         <tr>
           <th className="py-3 w-10 text-center">#</th>
-          <th className="py-3 w-[40%]">Tiêu đề</th>
-          <th className="py-3 w-[25%]">Album</th>
-          <th className="py-3 w-[20%]">Ngày thêm</th>
-          <th className="py-3 w-[15%] text-center">
+          <th className="py-3 w-[50%]">Tiêu đề</th>
+          <th className="py-3 w-[30%]">Ngày thêm</th>
+          <th className="py-3 w-[20%] text-center">
             <Clock className="w-4 h-4 inline-block" />
           </th>
         </tr>
@@ -127,9 +126,6 @@ const Playlist = ({
                   </div>
                 </div>
               </td>
-              <td className="py-3 w-[25%] truncate hover:underline hover:text-white">
-                {song.album}
-              </td>
               <td className="py-3 w-[20%] truncate">
                 {new Date(song.createdAt).toLocaleDateString()}
               </td>
@@ -160,12 +156,6 @@ const Playlist = ({
                     </svg>
                     {activeOptionsId === song.songId && (
                       <div className="absolute top-full right-0 mt-2 z-50 bg-zinc-800 border border-zinc-700 rounded-md shadow-md w-40 text-sm">
-                        <button
-                          onClick={() => handleViewInfo(song)}
-                          className="block w-full text-left px-4 py-2 hover:bg-zinc-700 text-white"
-                        >
-                          Xem thông tin
-                        </button>
                         <button
                           onClick={() => handleRemoveFromPlaylist(song)}
                           className="block w-full text-left px-4 py-2 hover:bg-zinc-700 text-red-400"
