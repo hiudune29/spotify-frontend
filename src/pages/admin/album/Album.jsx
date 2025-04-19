@@ -6,9 +6,9 @@ import {
 } from "../../../redux/slice/albumSlice"; // Giả sử bạn có action này
 import { Table, Button, Space } from "antd";
 import AdminTable from "../../../components/admin/ui/Table"; // Giả sử bạn có component này
+
 const Album = () => {
   const dispatch = useDispatch();
-  // const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
 
   useEffect(() => {
@@ -75,6 +75,13 @@ const Album = () => {
       title: "Type",
       dataIndex: "type",
       key: "type",
+    },
+    {
+      title: "Ngày khởi tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      sortOrder: sortedInfo.columnKey === "createdAt" ? sortedInfo.order : null,
     },
     {
       title: "Trạng thái",

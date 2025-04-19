@@ -30,14 +30,15 @@ const UpdateAlbum = () => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
-  const { content: artistItems = [] } = useSelector(selectItemsArtist);
+  const { content: artist = [] } = useSelector(selectItemsArtist);
   const { content: albums = [] } = useSelector(selectItemsAlbum); // list album để chọn
-  const albumDetail = useSelector(selectAlbum); // chi tiết album
 
   useEffect(() => {
     dispatch(fetchArtistsSelect());
     dispatch(fetchAlbumsSelect());
   }, [dispatch]);
+
+  const albumDetail = useSelector(selectAlbum); // chi tiết album
 
   useEffect(() => {
     if (albumDetail) {
@@ -45,7 +46,7 @@ const UpdateAlbum = () => {
         albumId: albumDetail.albumId,
         title: albumDetail.title,
         releaseDate: dayjs(albumDetail.releaseDate),
-        artist: albumDetail.artistId,
+        artist: albumDetail.artist?.artistId,
         type: albumDetail.type,
         image: albumDetail.coverImage
           ? [
@@ -62,7 +63,7 @@ const UpdateAlbum = () => {
     }
   }, [albumDetail, form]);
 
-  const artistOptions = artistItems.map((artist) => ({
+  const artistOptions = artist.map((artist) => ({
     label: artist.name,
     value: artist.artistId,
   }));

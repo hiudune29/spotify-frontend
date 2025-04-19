@@ -17,7 +17,11 @@ function getItem(label, key, icon, children) {
 
 const items = [
   getItem("Tổng quan", "dashboard", <PieChartOutlined />),
-  getItem("Bài hát", "song", <PieChartOutlined />),
+  getItem("Bài hát", "songs", <PieChartOutlined />, [
+    getItem("Danh sách bài hát", "song"),
+    getItem("Thêm bài hát", "song/create"),
+    getItem("Cập nhật bài hát", "song/update"),
+  ]),
   getItem("Nghệ sĩ", "artists", <DesktopOutlined />, [
     getItem("Danh sách nghệ sĩ", "artist"),
     getItem("Thêm nghệ sĩ", "artist/create"),
@@ -26,9 +30,13 @@ const items = [
   getItem("Album/EP", "albums", <DesktopOutlined />, [
     getItem("Danh sách Album/EP", "album"),
     getItem("Thêm Album/EP", "album/create"),
-    getItem("Cập nhật nghệ sĩ", "album/update"),
+    getItem("Cập nhật Album/EP", "album/update"),
   ]),
-  getItem("Danh sách phát", "playlist", <DesktopOutlined />),
+  getItem("Danh sách phát", "playlists", <DesktopOutlined />, [
+    getItem("Danh sách phát", "playlist"),
+    getItem("Thêm danh sách phát", "playlist/create"),
+    getItem("Cập nhật danh sách phát", "playlist/update"),
+  ]),
 ];
 const pageTitles = {
   dashboard: "Tổng quan",
@@ -45,6 +53,11 @@ const LayoutAdmin = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const [openKeys, setOpenKeys] = useState([]);
+  const onOpenChange = (keys) => {
+    // Nếu user mở nhiều menu thì chỉ giữ cái cuối cùng
+    setOpenKeys(keys.length ? [keys[keys.length - 1]] : []);
+  };
   const location = useLocation(); // <-- Lấy URL hiện tại
   const navigate = useNavigate(); // <-- Để điều hướng khi click menu
 
@@ -71,7 +84,9 @@ const LayoutAdmin = () => {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[path]}
+          selectedKeys={[path]} // path là key hiện tại, ví dụ: "album/create"
+          openKeys={openKeys}
+          onOpenChange={onOpenChange}
           onClick={({ key }) => {
             navigate(`/admin/${key}`);
           }}
