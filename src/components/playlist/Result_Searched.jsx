@@ -116,7 +116,7 @@ const AddSongPlaylist = ({ song, onClose }) => {
 };
 
 // Component: CardSong
-const CardSong = ({ song, onSongClick }) => {
+const CardSong = ({ song }) => {
   const dispatch = useDispatch();
 
   const handlePlay = (song) => {
@@ -187,33 +187,48 @@ const ArtistCard = ({ artist, onClick }) => {
 // Component: AlbumCard
 const AlbumCard = ({ album, onClick }) => {
   const dispatch = useDispatch();
-
-  // Log để debug dữ liệu album
-  console.log("Album data in AlbumCard:", album);
-
-  // Lấy dữ liệu album đúng cách
-  const albumInfo = album?.album || {};
-  const songs = album?.songs || [];
+  const { isRandom } = useSelector((state) => state.playlists);
 
   const handlePlay = (e) => {
     e.stopPropagation();
-    if (album.songs && album.songs.length > 0) {
-      // Clear existing queue
-      dispatch(clearQueue());
-      // Set new queue with album songs
-      dispatch(setQueue(album.songs));
-      // Set first song as current
-      dispatch(setCurrentSong(album.songs[0]));
-      // Start playing
-      dispatch(togglePlay(true));
+    // Kiểm tra xem album và songs có tồn tại không
+    if (album?.songs?.length > 0) {
+      try {
+        // Clear queue trước
+        dispatch(clearQueue());
+
+        // Tạo mảng mới từ tất cả bài hát của album
+        const newQueue = [...album.songs].map((song) => ({
+          ...song,
+          albumId: album.album?.albumId, // Thêm albumId vào mỗi bài hát
+        }));
+
+        // Set queue mới
+        dispatch(setQueue(newQueue));
+
+        // Chọn bài hát để phát
+        if (isRandom) {
+          const randomIndex = Math.floor(Math.random() * newQueue.length);
+          dispatch(setCurrentSong(newQueue[randomIndex]));
+        } else {
+          dispatch(setCurrentSong(newQueue[0]));
+        }
+
+        // Bật phát nhạc
+        dispatch(togglePlay(true));
+      } catch (error) {
+        console.error("Error playing album:", error);
+      }
+    } else {
+      console.log("No songs available in this album");
     }
   };
 
   const handleAlbumClick = () => {
     const formattedAlbum = {
       type: "album",
-      songs: songs,
-      album: albumInfo,
+      songs: album.songs || [],
+      album: album.album,
     };
     onClick("album", formattedAlbum);
   };
@@ -225,8 +240,8 @@ const AlbumCard = ({ album, onClick }) => {
     >
       <div className="relative">
         <img
-          src={albumInfo.coverImage || "https://via.placeholder.com/180"}
-          alt={albumInfo.title || "Album"}
+          src={album.album?.coverImage || "https://via.placeholder.com/180"}
+          alt={album.album?.name || "Album"}
           className="w-[180px] h-[180px] object-cover rounded-md"
         />
         <button
@@ -244,10 +259,10 @@ const AlbumCard = ({ album, onClick }) => {
         </button>
       </div>
       <h3 className="mt-2 text-sm font-medium text-white leading-tight">
-        {albumInfo.title || "Unknown Album"}
+        {album.album?.title || "Unknown Album"}
       </h3>
       <p className="mt-1 text-xs font-normal text-gray-400 truncate">
-        {albumInfo.artist?.name || "Unknown Artist"}
+        {album.album?.artist?.name || "Unknown Artist"}
       </p>
     </div>
   );
@@ -255,6 +270,17 @@ const AlbumCard = ({ album, onClick }) => {
 
 // Component: PlaylistCard
 const PlaylistCard = ({ playlist, onClick }) => {
+  const handlePlaylistClick = () => {
+    const formattedPlaylist = {
+      playlist: {
+        ...playlist.playlist,
+        isPrivate: playlist.playlist.isPrivate, // Thêm isPrivate vào đây
+      },
+      songs: playlist.songs || [],
+    };
+    onClick("playlist", formattedPlaylist);
+  };
+
   const dispatch = useDispatch();
 
   const handlePlay = (e) => {
@@ -267,7 +293,9 @@ const PlaylistCard = ({ playlist, onClick }) => {
   const playlistData = playlist.playlist || {};
 
   return (
-    <div className="playlist-card" onClick={() => onClick(playlist)}>
+    <div className="playlist-card" onClick={handlePlaylistClick}>
+      {" "}
+      {/* Thay đổi ở đây */}
       <div className="relative">
         <img
           src={playlistData.coverImage || "https://via.placeholder.com/180"}
@@ -370,7 +398,19 @@ const Result_Searched = () => {
 
   const handleItemClick = (type, data) => {
     if (type === "playlist") {
-      dispatch(setShowPlaylist({ show: true, playlist: data }));
+      const playlistContent = {
+        show: true,
+        playlist: {
+          type: "playlist",
+          playlist: {
+            ...data.playlist,
+            isPrivate: data.playlist.isPrivate, // Đảm bảo isPrivate được truyền
+          },
+          songs: data.songs || [],
+        },
+      };
+      console.log("Formatted playlist content:", playlistContent);
+      dispatch(setShowPlaylist(playlistContent));
     } else if (type === "album") {
       // Format album data for PlaylistContent
       const albumContent = {

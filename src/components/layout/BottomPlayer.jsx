@@ -184,46 +184,49 @@ const BottomPlayer = () => {
       (s) => s?.songId === currentSong?.songId
     );
 
-    // Debug log để kiểm tra giá trị currentSong
-    console.log("Current song before fetch:", {
-      currentSong,
-      songId: currentSong?.songId,
-    });
+    // Nếu đang phát playlist và bật random
+    if (queue.length > 1 && isRandom) {
+      dispatch(playNextSong()); // Sẽ random trong queue hiện tại
+      return;
+    }
 
-    if (currentIndex === queue.length - 1 || queue.length === 0) {
-      console.log("Queue ended, fetching random song...");
-
+    // Nếu là bài cuối hoặc chỉ có 1 bài trong queue (single song)
+    if (currentIndex === queue.length - 1 || queue.length === 1) {
       if (repeatMode === 2) {
         dispatch(playNextSong());
       } else {
         try {
-          // Kiểm tra currentSong tồn tại trước khi truy cập songId
-          const excludeSongId = currentSong?.songId || undefined;
-
-          // Clear queue cũ
-          dispatch(clearQueue());
-
-          // Log để debug
-          console.log("Fetching random song with exclude id:", excludeSongId);
-
-          // Fetch random song với proper error handling
+          // Fetch random song mới
+          const excludeSongId = currentSong?.songId;
           const result = await dispatch(
             fetchRandomSong(excludeSongId)
           ).unwrap();
 
           if (result) {
-            console.log("Random song received:", result);
+            // Đè queue cũ và phát ngay
+            dispatch(clearQueue());
             dispatch(setQueue([result]));
             dispatch(setCurrentSong(result));
             dispatch(togglePlay(true));
-          } else {
-            console.error("Received empty result from random song fetch");
+
+            // Cập nhật audio
+            if (audioRef.current) {
+              audioRef.current.src = result.fileUpload;
+              audioRef.current.load();
+              audioRef.current
+                .play()
+                .catch((error) =>
+                  console.error("Error playing new random song:", error)
+                );
+            }
           }
         } catch (error) {
           console.error("Error fetching random song:", error);
+          dispatch(togglePlay(false));
         }
       }
     } else {
+      // Còn bài tiếp theo trong queue
       dispatch(playNextSong());
     }
   };

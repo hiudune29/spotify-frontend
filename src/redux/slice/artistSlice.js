@@ -1,14 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Fetch tất cả nghệ sĩ
 export const fetchArtists = createAsyncThunk(
   "artist/fetchArtists",
   async ({ pageNo, pageSize } = {}, thunkAPI) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/artist/all?pageNo=${pageNo}&pageSize=${pageSize}`
+        `http://localhost:8080/api/artist/all?pageNo=${pageNo}&pageSize=${pageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
-      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+      return res.data.result; // Chỉ lấy phần `result` trong ApiResponse
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Fetch failed"
@@ -16,20 +22,28 @@ export const fetchArtists = createAsyncThunk(
     }
   }
 );
+
+// Fetch nghệ sĩ theo ID
 export const fetchArtistById = createAsyncThunk(
   "artist/fetchArtistById",
   async (artistId, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/artist/${artistId}`
+        `http://localhost:8080/api/artist/${artistId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
-      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+      return res.data.result; // Chỉ lấy phần `result` trong ApiResponse
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Fetch failed");
     }
   }
 );
 
+// Fetch danh sách nghệ sĩ chọn lọc (chỉ lấy nghệ sĩ có trạng thái active)
 export const fetchArtistsSelect = createAsyncThunk(
   "artist/fetchArtistsSelect",
   async (thunkAPI) => {
@@ -39,14 +53,17 @@ export const fetchArtistsSelect = createAsyncThunk(
         {
           params: {
             pageNo: 0,
-            pageSize: 1000, // để lấy tất cả
+            pageSize: 1000, // Để lấy tất cả
             sortBy: "name",
             sortDir: "asc",
-            status: true, // hoặc false tùy bạn muốn lấy active hay đã bị disable
+            status: true, // Hoặc false tùy bạn muốn lấy active hay đã bị disable
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+      return res.data.result; // Chỉ lấy phần `result` trong ApiResponse
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Fetch failed"
@@ -54,6 +71,8 @@ export const fetchArtistsSelect = createAsyncThunk(
     }
   }
 );
+
+// Tạo mới một nghệ sĩ
 export const createArtist = createAsyncThunk(
   "artist/createArtist",
   async (artistData, { rejectWithValue }) => {
@@ -71,7 +90,7 @@ export const createArtist = createAsyncThunk(
           { type: "application/json" }
         )
       );
-      // Kiểm tra xem albumData.image có tồn tại và image[0] có tồn tại originFileObj không
+      // Kiểm tra xem image có tồn tại không và append vào formData
       formData.append("img", artistData.image[0].originFileObj);
 
       const res = await axios.post(
@@ -80,15 +99,18 @@ export const createArtist = createAsyncThunk(
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+      return res.data.result; // Chỉ lấy phần `result` trong ApiResponse
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Fetch failed");
     }
   }
 );
+
+// Cập nhật thông tin nghệ sĩ
 export const updateArtist = createAsyncThunk(
   "artist/updateArtist",
   async (artistData, { rejectWithValue }) => {
@@ -111,20 +133,34 @@ export const updateArtist = createAsyncThunk(
 
       const res = await axios.put(
         `http://localhost:8080/api/artist/${artistData.artistId}`,
-        artistData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
-      return res.data.result; // <-- chỉ lấy phần `result` trong ApiResponse
+      return res.data.result; // Chỉ lấy phần `result` trong ApiResponse
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Fetch failed");
     }
   }
 );
+
+// Cập nhật trạng thái của nghệ sĩ (active/inactive)
 export const toggleArtistStatus = createAsyncThunk(
   "artist/updateStatus",
   async (artistId, { rejectWithValue }) => {
     try {
       const res = await axios.put(
-        `http://localhost:8080/api/artist/status/${artistId}`
+        `http://localhost:8080/api/artist/status/${artistId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       return res.data.result;
     } catch (err) {
@@ -136,55 +172,44 @@ export const toggleArtistStatus = createAsyncThunk(
 const artistSlice = createSlice({
   name: "artist",
   initialState: {
-    items: [],
-    artistSelected: {},
+    items: [], // Danh sách nghệ sĩ
+    artistSelected: {}, // Nghệ sĩ đang được chọn
   },
-  reducers: {
-    // Nếu có thêm action khác như add/update/delete thì viết ở đây
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      // lấy dữ liệu all artist
+      // Fetch all artists
       .addCase(fetchArtists.fulfilled, (state, action) => {
         state.items = action.payload;
       })
-      //lấy dữ liệu all artist Select
+      // Fetch all artists for selection
       .addCase(fetchArtistsSelect.fulfilled, (state, action) => {
         state.items = action.payload;
       })
-      // lấy dữ liệu artist theo id
+      // Fetch artist by ID
       .addCase(fetchArtistById.fulfilled, (state, action) => {
         state.artistSelected = action.payload;
       })
-      // xử lý true/false status
+      // Update artist status
       .addCase(toggleArtistStatus.fulfilled, (state, action) => {
         const updatedArtist = action.payload;
 
-        if (Array.isArray(state.items.content)) {
-          const index = state.items.content.findIndex(
-            (item) => item.artistId === updatedArtist.artistId
-          );
-          if (index !== -1) {
-            state.items.content[index] = updatedArtist;
-          }
-        }
-
-        if (Array.isArray(state.items)) {
-          const index = state.items.findIndex(
-            (item) => item.artistId === updatedArtist.artistId
-          );
-          if (index !== -1) {
-            state.items[index] = updatedArtist;
-          }
+        // Cập nhật artist trong mảng `items`
+        const index = state.items.findIndex(
+          (item) => item.artistId === updatedArtist.artistId
+        );
+        if (index !== -1) {
+          state.items[index] = updatedArtist;
         }
       });
   },
 });
 
 export const selectItemsArtist = (state) => {
-  return state.artist.items; // trả về mảng artist
+  return state.artist.items; // Trả về danh sách nghệ sĩ
 };
 export const selectArtist = (state) => {
-  return state.artist.artistSelected; // trả về artist được chọn
+  return state.artist.artistSelected; // Trả về nghệ sĩ được chọn
 };
+
 export default artistSlice.reducer;

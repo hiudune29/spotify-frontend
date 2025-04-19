@@ -3,7 +3,9 @@ import { Button, DatePicker, Form, Upload, Input, Select, message } from "antd";
 import dayjs from "dayjs";
 import { UploadOutlined } from "@ant-design/icons";
 import {
+  //đây là để lấy artist đổ vào select
   fetchArtistsSelect,
+  //đây là để lấy đường dẫn state
   selectItemsArtist,
 } from "../../../redux/slice/artistSlice"; // Giả sử bạn có action này
 import { useDispatch, useSelector } from "react-redux";
@@ -108,7 +110,6 @@ const CreateAlbum = () => {
             rules={[{ required: true, message: "Vui lòng chọn ảnh" }]}
           >
             <Upload
-              name="image"
               listType="picture"
               beforeUpload={() => false}
               accept="image/*"

@@ -1,27 +1,40 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import PlaylistHeader from "./playlistheader";
-import { Ellipsis } from "lucide-react";
+import { Check } from "lucide-react";
 import ButtonPlay from "../ui/buttonplay";
 import Playlist from "./playlist";
 import {
   setQueue,
   togglePlay,
   setCurrentSong,
+  clearQueue,
+  togglePlaylistPrivate, // Add this import
 } from "../../redux/slice/playlistSlice";
+import { message } from "antd";
 
 const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
   const dispatch = useDispatch();
+  const currentUserId = useSelector((state) => state.user.userId); // Thêm dòng này
 
-  const { currentPlaylist, currentPlayingSongId, isPlaying, loading } =
-    useSelector((state) => state.playlists);
+  const {
+    currentPlaylist,
+    currentPlayingSongId,
+    isPlaying,
+    loading,
+    isRandom,
+  } = useSelector((state) => state.playlists);
   const { showPlaylist, selectedPlaylist } = useSelector(
     (state) => state.search
   );
 
-  // Sửa lại cách lấy playlistData
-  const playlistData =
-    showPlaylist && selectedPlaylist ? selectedPlaylist : currentPlaylist;
+  // Sửa lại cách lấy playlistData với kiểm tra null
+  const playlistData = useMemo(() => {
+    if (showPlaylist && selectedPlaylist) {
+      return selectedPlaylist;
+    }
+    return currentPlaylist;
+  }, [showPlaylist, selectedPlaylist, currentPlaylist]);
 
   // Kiểm tra và log dữ liệu
   console.log("PlaylistContent received:", {
@@ -33,28 +46,34 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
 
   const handlePlay = () => {
     if (type === "song" && singleSong) {
-      // Nếu bài hát đang phát là single song này
+      // Xử lý cho single song
       if (currentPlayingSongId === singleSong.songId) {
         dispatch(togglePlay(!isPlaying));
       } else {
-        // Nếu là bài khác, set queue mới và phát
+        // Xóa queue cũ và thêm bài hát mới vào queue
+        dispatch(clearQueue());
         dispatch(setQueue([singleSong]));
         dispatch(setCurrentSong(singleSong));
         dispatch(togglePlay(true));
       }
     } else if (playlistData?.songs?.length > 0) {
-      // Kiểm tra xem có bài hát nào đang phát từ playlist này không
+      // Xử lý cho playlist
       const isPlayingFromThisPlaylist = playlistData.songs.some(
         (song) => song.songId === currentPlayingSongId
       );
 
       if (isPlayingFromThisPlaylist) {
-        // Nếu đang phát từ playlist này thì toggle play/pause
         dispatch(togglePlay(!isPlaying));
       } else {
-        // Nếu chưa phát từ playlist này, set queue mới và phát từ đầu
-        dispatch(setQueue(playlistData.songs));
-        dispatch(setCurrentSong(playlistData.songs[0]));
+        const newQueue = [...playlistData.songs];
+        dispatch(setQueue(newQueue));
+        // Chọn bài hát để phát dựa trên chế độ random
+        if (isRandom) {
+          const randomIndex = Math.floor(Math.random() * newQueue.length);
+          dispatch(setCurrentSong(newQueue[randomIndex]));
+        } else {
+          dispatch(setCurrentSong(newQueue[0]));
+        }
         dispatch(togglePlay(true));
       }
     }
@@ -62,11 +81,21 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
 
   const renderContent = () => {
     // Log để debug
-    console.log("Rendering content with:", {
+    console.log("PlaylistContent data:", {
       playlistData,
       type,
       selectedPlaylist,
+      currentPlaylist,
     });
+
+    // Xử lý cho playlist trống
+    if (!playlistData) {
+      return (
+        <div className="text-white text-center p-8">
+          No playlist data available
+        </div>
+      );
+    }
 
     // Xử lý cho album
     if (playlistData?.type === "album") {
@@ -130,7 +159,6 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
                   isPlaying && currentPlayingSongId === singleSong.songId
                 }
               />
-              <Ellipsis className="scale-110 text-gray-400 hover:text-white cursor-pointer" />
             </div>
             <Playlist
               songs={[singleSong]}
@@ -141,25 +169,47 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
       );
     }
 
-    // Xử lý cho playlist thường
-    if (!playlistData?.playlist && !singleSong) {
+    // Xử lý cho playlist thường với kiểm tra null
+    const contentData = type === "album" ? playlistData : playlistData.playlist;
+
+    if (!contentData) {
       return (
         <div className="text-white text-center p-8">
-          No playlist data available
+          Invalid playlist data format
         </div>
       );
     }
 
-    const contentData = type === "album" ? playlistData : playlistData.playlist;
+    // Add handleTogglePrivate here where contentData is available
+    const handleTogglePrivate = async () => {
+      if (contentData?.playlistId) {
+        try {
+          const resultAction = await dispatch(
+            togglePlaylistPrivate(contentData.playlistId)
+          );
+          if (togglePlaylistPrivate.fulfilled.match(resultAction)) {
+            message.success(
+              `Chuyển đổi trạng thái playlist thành ${
+                resultAction.payload.isPrivate ? "Private" : "Public"
+              }`
+            );
+          }
+        } catch (error) {
+          console.error("Failed to toggle playlist privacy:", error);
+        }
+      }
+    };
 
     return (
       <>
         <PlaylistHeader
           content={{
-            name: contentData.name || contentData.title,
-            description: contentData.description,
+            name: contentData.name || contentData.title || "Untitled Playlist",
+            description: contentData.description || "",
             coverImage: contentData.coverImage,
-            user: contentData.user,
+            user: contentData.user || { fullName: "Unknown User" },
+            playlistId: contentData.playlistId,
+            isPrivate: contentData.isPrivate,
           }}
           type={type}
           songs={playlistData.songs || []}
@@ -175,13 +225,26 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
                 )
               }
             />
-            <Ellipsis className="scale-110 text-gray-400 hover:text-white cursor-pointer" />
+            {/* Chỉ hiển thị nút toggle private khi userId trùng khớp */}
+            {currentUserId === contentData.user?.userId && (
+              <div className="flex items-center gap-2">
+                <Check
+                  className={`scale-110 cursor-pointer ${
+                    !contentData.isPrivate ? "text-green-500" : "text-gray-400"
+                  }`}
+                  onClick={handleTogglePrivate}
+                />
+                <span className="text-sm text-gray-400">
+                  {contentData.isPrivate ? "Private" : "Public"}
+                </span>
+              </div>
+            )}
           </div>
           <Playlist
             songs={playlistData.songs || []}
             currentPlayingSongId={currentPlayingSongId}
-            showOptions={true}
-            playlistId={currentPlaylist.playlist?.playlistId}
+            showOptions={currentUserId === contentData.user?.userId}
+            playlistId={contentData.playlistId}
           />
         </div>
       </>
