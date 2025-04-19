@@ -70,16 +70,9 @@ const Playlist = ({
       <thead className="text-gray-400 text-sm font-semibold border-b border-gray-700">
         <tr>
           <th className="py-3 w-10 text-center">#</th>
-<<<<<<< HEAD
-          <th className="py-3 w-[40%]">Tiêu đề</th>
-          <th className="py-3 w-[25%]">Album</th>
-          <th className="py-3 w-[20%]">Ngày phát hành</th>
-          <th className="py-3 w-[15%] text-center">
-=======
           <th className="py-3 w-[50%]">Tiêu đề</th>
           <th className="py-3 w-[30%]">Ngày thêm</th>
           <th className="py-3 w-[20%] text-center">
->>>>>>> 202e8c77c11a82e1781da768b0467718acb10766
             <Clock className="w-4 h-4 inline-block" />
           </th>
         </tr>
