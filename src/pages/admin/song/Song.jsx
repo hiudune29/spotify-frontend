@@ -74,10 +74,19 @@ const Songs = () => {
       ellipsis: true,
     },
     {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      ellipsis: true,
+      title: "Nghệ sĩ tham gia",
+      dataIndex: "featuredArtists",
+      key: "featuredArtists",
+      render: (featuredArtists) => {
+        if (Array.isArray(featuredArtists)) {
+          // Chuyển mảng đối tượng thành mảng tên nghệ sĩ
+          const artistNames = featuredArtists.map((artist) => artist.name);
+          // Nối các tên nghệ sĩ thành chuỗi, cách nhau bởi dấu phẩy
+          return artistNames.join(", ");
+        }
+        return "";
+      },
+      // ellipsis: true,
     },
     {
       title: "Hình ảnh",

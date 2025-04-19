@@ -44,6 +44,14 @@ const Playlist = () => {
       ellipsis: true,
     },
     {
+      title: "User sở hữu",
+      dataIndex: ["user", "userName"], // ← hoặc dùng render như bên dưới
+      key: "user",
+      sorter: (a, b) => a.user.userName.localeCompare(b.user.userName),
+      sortOrder: sortedInfo.columnKey === "user" ? sortedInfo.order : null,
+      ellipsis: true,
+    },
+    {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",

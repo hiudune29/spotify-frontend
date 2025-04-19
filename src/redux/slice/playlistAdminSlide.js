@@ -7,7 +7,12 @@ export const fetchPlaylistsAdmin = createAsyncThunk(
   async ({ pageNo, pageSize } = {}, thunkAPI) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/playlists/page?pageNo=${pageNo}&pageSize=${pageSize}`
+        `http://localhost:8080/api/playlists/page?pageNo=${pageNo}&pageSize=${pageSize}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
 
       const result = res.data.result;
@@ -17,7 +22,12 @@ export const fetchPlaylistsAdmin = createAsyncThunk(
         result.content.map(async (playlist) => {
           try {
             const songsRes = await axios.get(
-              `http://localhost:8080/api/playlists/song/${playlist.playlistId}`
+              `http://localhost:8080/api/playlists/song/${playlist.playlistId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
             );
 
             return {
@@ -53,43 +63,66 @@ export const fetchPlaylistAdminById = createAsyncThunk(
   async (playlistId, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/playlists/${playlistId}`
+        `http://localhost:8080/api/playlists/${playlistId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
+
       return res.data.result;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Fetch failed");
     }
   }
 );
+
 // Create new playlist
 export const createPlaylist = createAsyncThunk(
   "playlist/createPlaylist",
   async (playlistData, { rejectWithValue }) => {
     try {
       const formData = new FormData();
+
+      // Append playlist DTO
       formData.append(
         "playlistDto",
         new Blob(
           [
             JSON.stringify({
               name: playlistData.name,
+              userId: playlistData.userId,
               description: playlistData.description,
               isPrivate: playlistData.isPrivate,
-              userId: playlistData.userId,
             }),
           ],
           { type: "application/json" }
         )
       );
+
+      // Append cover image if exists
       if (playlistData.coverImage?.[0]?.originFileObj) {
-        formData.append("img", playlistData.coverImage[0].originFileObj);
+        formData.append("coverImage", playlistData.coverImage[0].originFileObj);
       }
 
+      // Append playlistSongIds directly if exists
+      if (playlistData.songs?.length > 0) {
+        formData.append(
+          "playlistSongIds",
+          JSON.stringify(playlistData.songs) // Append as a JSON string
+        );
+      }
+
+      // Make the POST request
       const res = await axios.post(
-        "http://localhost:8080/api/playlist/create",
+        "http://localhost:8080/api/playlists/adminCreate", // Ensure the correct endpoint
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
       return res.data.result;
@@ -121,7 +154,7 @@ export const updatePlaylist = createAsyncThunk(
         )
       );
       if (playlistData.coverImage?.[0]?.originFileObj) {
-        formData.append("img", playlistData.coverImage[0].originFileObj);
+        formData.append("coverImage", playlistData.coverImage[0].originFileObj);
       }
 
       const res = await axios.put(
@@ -144,7 +177,13 @@ export const togglePlaylistStatus = createAsyncThunk(
   async (playlistId, { rejectWithValue }) => {
     try {
       const res = await axios.put(
-        `http://localhost:8080/api/playlist/status/${playlistId}`
+        `http://localhost:8080/api/playlist/status/${playlistId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       return res.data.result;
     } catch (error) {
@@ -157,10 +196,11 @@ const playlistAdminSlice = createSlice({
   name: "playlistAdmin",
   initialState: {
     items: [],
-    playlistSongs: [],
     playlistSelected: {},
   },
-  reducers: {},
+  reducers: {
+    resetPlaylistSelected: (state) => ({ ...state, playlistSelected: {} }),
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchPlaylistsAdmin.fulfilled, (state, action) => {
@@ -169,23 +209,14 @@ const playlistAdminSlice = createSlice({
       .addCase(fetchPlaylistAdminById.fulfilled, (state, action) => {
         state.playlistSelected = action.payload;
       })
-
       .addCase(togglePlaylistStatus.fulfilled, (state, action) => {
         const updated = action.payload;
 
-        if (Array.isArray(state.items.content)) {
-          const idx = state.items.content.findIndex(
-            (p) => p.playlistId === updated.playlistId
-          );
-          if (idx !== -1) state.items.content[idx] = updated;
-        }
-
-        if (Array.isArray(state.items)) {
-          const idx = state.items.findIndex(
-            (p) => p.playlistId === updated.playlistId
-          );
-          if (idx !== -1) state.items[idx] = updated;
-        }
+        // Cập nhật playlist trong mảng `items`
+        const idx = state.items.findIndex(
+          (p) => p.playlistId === updated.playlistId
+        );
+        if (idx !== -1) state.items[idx] = updated;
       });
   },
 });
@@ -193,3 +224,4 @@ const playlistAdminSlice = createSlice({
 export const selectItemsPlaylist = (state) => state.playlist.items;
 export const selectPlaylist = (state) => state.playlist.playlistSelected;
 export default playlistAdminSlice.reducer;
+export const { resetPlaylistSelected } = playlistAdminSlice.actions;
