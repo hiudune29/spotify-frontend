@@ -30,11 +30,6 @@ const Playlist = ({
     dispatch(setCurrentSongIndex(index));
   };
 
-  const handleViewInfo = (song) => {
-    console.log("Thông tin bài hát:", song);
-    setActiveOptionsId(null);
-  };
-
   const handleRemoveFromPlaylist = async (song) => {
     try {
       await axios.put("http://localhost:8080/api/playlists/removesong", null, {

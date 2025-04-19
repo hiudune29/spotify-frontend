@@ -74,7 +74,7 @@ const AddSongPlaylist = ({ song, onClose }) => {
 };
 
 // Component: CardSong
-const CardSong = ({ song, onSongClick }) => {
+const CardSong = ({ song }) => {
   const dispatch = useDispatch();
 
   const handlePlay = (song) => {
@@ -160,9 +160,6 @@ const AlbumCard = ({ album, onClick }) => {
           ...song,
           albumId: album.album?.albumId, // Thêm albumId vào mỗi bài hát
         }));
-
-        // Log để debug
-        console.log("Setting queue with songs:", newQueue);
 
         // Set queue mới
         dispatch(setQueue(newQueue));
