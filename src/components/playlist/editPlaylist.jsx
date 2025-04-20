@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"; // Import useSelector
 import { HiOutlinePencil } from "react-icons/hi";
 import { X } from "lucide-react";
 import { updatePlaylist } from "../../redux/slice/playlistSlice";
+import { fetchPlaylistsByUserId } from "../../redux/slice/playlistSlice";
 
 const PlaylistEditModal = ({
   isOpen,
@@ -13,6 +14,7 @@ const PlaylistEditModal = ({
   playlistId,
 }) => {
   const dispatch = useDispatch();
+  const userId = useSelector((state) => state.user.userId); // Lấy userId từ Redux store
   const [playlistName, setPlaylistName] = useState(name || "");
   const [newDescription, setNewDescription] = useState(description || "");
   const [avatarFile, setAvatarFile] = useState(null);
@@ -26,18 +28,30 @@ const PlaylistEditModal = ({
     }
   }, [isOpen, name, description]);
 
-  const handleSave = async () => {
-    await dispatch(
+  const handleSave = () => {
+    if (!userId) {
+      console.error("User ID is undefined");
+      return;
+    }
+
+    dispatch(
       updatePlaylist({
         id: playlistId,
         playlistData: {
-          name: playlistName, // Changed from title to name
+          name: playlistName,
           description: newDescription,
         },
         avatarFile,
       })
-    );
-    onClose();
+    )
+      .then(() => {
+        // Gọi fetchPlaylistsByUserId với userId hợp lệ
+        dispatch(fetchPlaylistsByUserId(userId));
+      })
+      .finally(() => {
+        // Đóng modal sau khi hoàn tất
+        onClose();
+      });
   };
 
   if (!isOpen) return null;

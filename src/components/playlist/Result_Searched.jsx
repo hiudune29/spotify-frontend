@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 import {
   setCurrentSong,
   setSelectedSong,
   setQueue,
   clearQueue,
-  togglePlay, // Added clearQueue
+  togglePlay,
 } from "../../redux/slice/playlistSlice";
 import {
   setShowUserProfile,
@@ -24,9 +25,50 @@ const AddSongPlaylist = ({ song, onClose }) => {
     playlist.name.toLowerCase().includes(playlistSearch.toLowerCase())
   );
 
-  const handleAddToPlaylist = (playlist) => {
-    console.log(`Added song "${song.songName}" to playlist "${playlist.name}"`);
-    onClose();
+  const handleAddToPlaylist = async (playlist) => {
+    try {
+      if (!song?.songId || !playlist?.playlistId) {
+        throw new Error("Invalid song or playlist ID");
+      }
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in.");
+      }
+      console.log("Request data:", {
+        songId: song.songId,
+        playlistId: playlist.playlistId,
+        song: song,
+        playlist: playlist,
+      });
+      const response = await axios.post(
+        "http://localhost:8080/api/playlists/addsong",
+        null,
+        {
+          params: {
+            playlist: playlist.playlistId,
+            song: song.songId,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert(response.data.message || "Song added to playlist successfully");
+      onClose();
+    } catch (err) {
+      console.error("Error adding song to playlist:", err);
+      console.log("Error response:", err.response);
+      if (err.response?.status === 401) {
+        alert("Session expired. Please log in again.");
+        window.location.href = "/login";
+        return;
+      }
+      const errorMessage =
+        err.response?.data?.code && err.response?.data?.message
+          ? `[${err.response.data.code}] ${err.response.data.message}`
+          : err.message || "Failed to add song to playlist. Please try again.";
+      alert(errorMessage);
+    }
   };
 
   return (

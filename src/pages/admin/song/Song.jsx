@@ -86,8 +86,8 @@ const Songs = () => {
     },
     {
       title: "Hình ảnh",
-      dataIndex: "coverImage",
-      key: "coverImage",
+      dataIndex: "img",
+      key: "img",
       render: (url) => (
         <img
           src={url}

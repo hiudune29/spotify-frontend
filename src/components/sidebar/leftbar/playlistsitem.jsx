@@ -6,6 +6,7 @@ import {
   deletePlaylist,
   fetchPlaylistsByUserId,
 } from "../../../redux/slice/playlistSlice";
+import { clearSearchQuery } from "../../../redux/slice/searchSlice"; // Add this import
 import { Heart, Play, Trash2 } from "lucide-react";
 import { setShowPlaylist } from "../../../redux/slice/searchSlice"; // Thêm import này
 
@@ -23,6 +24,7 @@ const SidebarPlaylists = ({ playlists, isExpanded }) => {
     // Sau đó mới fetch và hiển thị playlist từ sidebar
     dispatch(fetchPlaylistSongs(playlistId));
     dispatch(togglePlaylistContent(true));
+    dispatch(clearSearchQuery()); // Add this to clear the search query
   };
 
   const isCurrentPlaylist = (playlist) => {

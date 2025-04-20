@@ -75,10 +75,10 @@ const MusicSession = () => {
 
   // Thêm effect để reset selectedSong khi showPlaylistContent thay đổi
   useEffect(() => {
-    if (!showPlaylistContent) {
-      dispatch(setSelectedSong(null)); // Sử dụng dispatch thay vì gọi trực tiếp
+    if (!showPlaylistContent && selectedSong) {
+      dispatch(setSelectedSong(null));
     }
-  }, [showPlaylistContent, dispatch]);
+  }, [showPlaylistContent, selectedSong, dispatch]);
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -97,7 +97,8 @@ const MusicSession = () => {
     console.log("New queue:", newQueue);
 
     dispatch(setQueue(newQueue));
-    dispatch(setSelectedSong(song)); // Vẫn giữ lại để hiển thị chi tiết bài hát
+    dispatch(setSelectedSong(song));
+    dispatch({ type: "playlists/setShowPlaylistContent", payload: true }); // Vẫn giữ lại để hiển thị chi tiết bài hát
   };
 
   // Nếu có bài hát được chọn, hiển thị PlaylistContent

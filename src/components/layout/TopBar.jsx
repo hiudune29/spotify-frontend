@@ -132,9 +132,6 @@ const RightIconGroup = () => {
       </button>
       {isMenuOpen && (
         <div className="menu">
-          <div className="menu-item" onClick={handleProfileClick}>
-            Profile
-          </div>
           <div className="menu-item" onClick={handleLogout}>
             Log out
           </div>

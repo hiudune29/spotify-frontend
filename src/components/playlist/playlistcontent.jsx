@@ -89,7 +89,7 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
     });
 
     // Xử lý cho playlist trống
-    if (!playlistData) {
+    if (!playlistData && type !== "song") {
       return (
         <div className="text-white text-center p-8">
           No playlist data available
@@ -140,7 +140,7 @@ const PlaylistContent = ({ type = "playlist", singleSong = null }) => {
     }
 
     // Xử lý cho single song
-    if (singleSong) {
+    if (singleSong || playlistData?.type === "song") {
       const songData = {
         name: singleSong.songName,
         description: singleSong.artistName,
